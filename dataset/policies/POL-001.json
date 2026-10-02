@@ -1,0 +1,49 @@
+{
+  "policy_id": "POL-001",
+  "policy_version": "v1",
+  "rules": [
+    {
+      "rule_id": "CLAUSE-PAY-001",
+      "rule_type": "CLAUSE_REQUIRED",
+      "clause": "Payment Terms",
+      "severity": "MEDIUM",
+      "statement": "The document must contain a Payment Terms clause.",
+      "params": {}
+    },
+    {
+      "rule_id": "CLAUSE-TERM-001",
+      "rule_type": "CLAUSE_REQUIRED",
+      "clause": "Termination",
+      "severity": "HIGH",
+      "statement": "The document must contain a Termination clause.",
+      "params": {}
+    },
+    {
+      "rule_id": "CLAUSE-LIAB-001",
+      "rule_type": "CLAUSE_REQUIRED",
+      "clause": "Liability",
+      "severity": "HIGH",
+      "statement": "The document must contain a Liability clause.",
+      "params": {}
+    },
+    {
+      "rule_id": "VALUE-PAY-001",
+      "rule_type": "VALUE_CONSTRAINT",
+      "clause": "Payment Terms",
+      "severity": "MEDIUM",
+      "statement": "Payment terms must not exceed 45 days.",
+      "params": { "field": "payment_days", "operator": "<=", "value": 45, "unit": "days" }
+    },
+    {
+      "rule_id": "ENUM-LAW-001",
+      "rule_type": "ENUM_CONSTRAINT",
+      "clause": "Governing Law",
+      "severity": "HIGH",
+      "statement": "Governing law must be one of the approved jurisdictions.",
+      "params": {
+        "field": "jurisdiction",
+        "allowed": ["India", "Singapore", "England and Wales"]
+      }
+    }
+  ]
+}

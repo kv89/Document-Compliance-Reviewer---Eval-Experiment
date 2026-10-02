@@ -1,0 +1,13 @@
+# Milestone 1 (steps 0-7) needs no LLM, no API key and no network.
+pydantic==2.13.5
+pytest==9.1.1
+pandas==2.3.3
+matplotlib==3.11.2
+pyyaml==6.0.3
+
+# Step 8 (agent loop) onward. Inference is the Google AI Studio free tier (spec 6.3);
+# the key is read from the GOOGLE_API_KEY environment variable and never stored in the repo.
+google-genai==2.25.0
+
+# Later milestones:
+# deepeval

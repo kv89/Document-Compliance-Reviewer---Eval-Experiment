@@ -1,0 +1,36 @@
+{
+  "dataset_version": "v1-m1",
+  "generator_seed": 7,
+  "generator_version": "g1",
+  "policy_id": "POL-001",
+  "policy_version": "v1",
+  "created_utc": "2026-10-01T17:43:46+00:00",
+  "case_count": 14,
+  "counts_by_category": {
+    "compliant": 2,
+    "missing_clause": 2,
+    "incorrect_value": 2,
+    "multiple_violations": 2,
+    "contradictory": 2,
+    "ambiguous": 2,
+    "distractor": 2
+  },
+  "checksums": {
+    "DOC-0001.txt": "5fd5748b12fb6b6b0d16f2b2be5738e17cd62fc5b9dc247c01c0a80cf49e461d",
+    "DOC-0002.txt": "e85401bbe0eedfcf73596f0ccf0051c39c5b6f6960b609fb84ee3bb443c00211",
+    "DOC-0003.txt": "e46b3031521ca030fbfde07af164f350be6737c1ad40e0e560b6cfbb0b712663",
+    "DOC-0004.txt": "0e53bac67ad3bcf7aa51ba256d87d1df6bcdfe97fdf5de9e455e81ae8fb7c11c",
+    "DOC-0005.txt": "48491b2b64a7ce7dc657bd84b15df0a61bc7f90b37e86536dd4d9e5fb6177f72",
+    "DOC-0006.txt": "dc3c2df570cd3df72f81fb88595f9827f201c5290fa6d212583eeb13d96ec502",
+    "DOC-0007.txt": "d3495b5242cf242f0d2953e5f55d6577deaab17f6c3c6557e9c33bbda5b2b835",
+    "DOC-0008.txt": "97ee5188c918bcab72f8dde552b6bb738880c47dcc822cfdc9d808df97a60d10",
+    "DOC-0009.txt": "6e89fb3d2429fe6efb9bf28ffa44002aa359290338d1acee35614e1493f98899",
+    "DOC-0010.txt": "2eeeba17766c73ba2e7c2eba2a16905c33c53d87a6fd4d68eebe4b4934c33efe",
+    "DOC-0011.txt": "9600c175fb815922e7740262fc05fa5b2e162c181a6da06d5f4113c9eef12e15",
+    "DOC-0012.txt": "685c7d1095c7e7c8de52190e82691e230793fd832bcf60ff72506ef5545a95d8",
+    "DOC-0013.txt": "55e2256712e133704860cda8587a23b28ff9a0a0ff248fe394dfca4e3e686a9c",
+    "DOC-0014.txt": "227e8f15fbe39728ea59c8e2f9013f625957765f953e1a52ae612b9dfef14cf1",
+    "ground_truth.jsonl": "553187459d95940f94b169fe917b491efa7258de9e2f06da821d41df5b4e89a4"
+  },
+  "schema_version": "1.0"
+}

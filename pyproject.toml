@@ -1,0 +1,29 @@
+[project]
+name = "document-compliance-reviewer"
+version = "0.1.0"
+description = "A controlled experiment in how AI agents should be evaluated, built as a document compliance reviewer."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "pydantic==2.13.5",
+    "pandas==2.3.3",
+    "matplotlib==3.11.2",
+    "pyyaml==6.0.3",
+    # Step 8 onward. Inference is the Google AI Studio free tier (spec section 6.3); the key is
+    # read from GOOGLE_API_KEY and never stored in the repository.
+    "google-genai==2.25.0",
+]
+
+[dependency-groups]
+dev = ["pytest==9.1.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# A flat layout with several top-level packages, so they are listed explicitly. Installing the
+# project in editable mode is what removes the need for a PYTHONPATH prefix on every command.
+[tool.hatch.build.targets.wheel]
+packages = ["agent", "analysis", "baselines", "dataset", "evaluation", "experiments"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

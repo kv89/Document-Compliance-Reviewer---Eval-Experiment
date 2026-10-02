@@ -1,0 +1,52 @@
+# Baseline configuration for Milestone 1, step 8 (spec sections 6.2, 6.4, 29).
+#
+# This file is pre-registered: it is written before the run, and a result that looks bad is not a
+# reason to edit it. Changes go through docs/decisions.md.
+#
+# The API key is NOT here and must never be. It is read from GOOGLE_API_KEY at run time.
+
+experiment_id: baseline_v1
+agent_version: v1
+prompt_version: p1
+tool_set_version: t1
+
+model:
+  provider: google-ai-studio
+  # Named version, not an alias. Spec 6.4 forbids `-latest` and `-preview` in a reported baseline.
+  # Flash-Lite rather than Flash: the Flash free tier allows 20 requests per day, and the agent
+  # uses around ten per trial, which is two trials a day (spec 6.4).
+  # 3.5 rather than 2.5: `gemini-2.5-flash-lite` is listed by the API but returns 404 for new keys,
+  # "no longer available to new users". See docs/decisions.md, 2026-10-02.
+  name: gemini-3.5-flash-lite
+  tag: gemini-3.5-flash-lite
+  temperature: 0.0
+  top_p: 1.0
+  seed: 7
+  max_output_tokens: 2048
+  # Lowest level the model accepts. `thinking_budget: 0` worked on Gemini 2.5 and returns a 400 on
+  # Gemini 3.x, whose floor is MINIMAL, so internal reasoning can be reduced but not switched off.
+  # The trace records the thinking tokens the provider charges for but never returns.
+  thinking_level: MINIMAL
+
+agent:
+  # Resolved O-3. DOC-0002's live trace needed 6 lookup_policy calls (one wasted guessing a rule_id
+  # that does not exist) plus 5 section reads and was still making forward progress, no loop, when
+  # 12 cut it off. 20 gives roughly 1.5x headroom over that observed need. docs/decisions.md,
+  # 2026-10-02.
+  max_steps: 20
+
+dataset:
+  version: v1
+  policy_id: POL-001
+
+run:
+  trials_per_case: 1  # full 175-case matrix at 1 trial/case; scale to 3 trials once request budget is confirmed (section 17)
+
+# Free-tier quota handling (spec 6.3 item 2). A rejected request is an infrastructure failure and is
+# recorded in `harness_error`, then excluded from every metric denominator. It is never scored as a
+# wrong answer.
+quota:
+  max_retries: 8
+  initial_backoff_seconds: 5
+  backoff_multiplier: 2
+  max_backoff_seconds: 90
