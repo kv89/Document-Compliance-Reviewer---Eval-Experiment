@@ -1,0 +1,404 @@
+{
+  "trace_schema_version": "1.2",
+  "experiment_id": "baseline_v1",
+  "case_id": "DOC-0001",
+  "trial_id": 1,
+  "run_id": "baseline_v1-20261001T184226Z",
+  "timestamp_utc": "2026-10-01T18:42:26+00:00",
+  "config": {
+    "provider": "google-ai-studio",
+    "model_name": "gemini-3.5-flash-lite",
+    "model_tag": "gemini-3.5-flash-lite",
+    "model_version": "gemini-3.5-flash-lite",
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "top_k": null,
+    "seed": 7,
+    "max_output_tokens": 2048,
+    "thinking_level": "MINIMAL",
+    "max_steps": 12,
+    "runtime_version": "google-genai 2.25.0",
+    "python_version": "3.11.9",
+    "hardware_id": "arm64 Darwin 27.0.0",
+    "prompt_version": "p1",
+    "tool_set_version": "t1",
+    "agent_version": "v1",
+    "dataset_version": "v1-m1",
+    "policy_version": "v1"
+  },
+  "agent_input": {
+    "policy_id": "POL-001",
+    "policy_version": "v1",
+    "document_chars": 1454
+  },
+  "events": [
+    {
+      "seq": 1,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"POL-001\"}}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 952,
+      "input_tokens": 635,
+      "output_tokens": 24,
+      "thinking_tokens": 0,
+      "stop_reason": "MALFORMED_FUNCTION_CALL"
+    },
+    {
+      "seq": 2,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 3,
+      "type": "tool_error",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": false,
+      "error": "UNKNOWN_RULE",
+      "result_summary": "{\"error\": \"UNKNOWN_RULE\", \"message\": \"No rule 'POL-001' in policy POL-001\", \"valid_rule_ids\": [\"CLAUSE-LIAB-001\", \"CLAUSE-PAY-001\", \"CLAUSE-TERM-001\", \"ENUM-LAW-001\", \"VALUE-PAY-001\"]}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 4,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"list_document_sections\", \"arguments\": {}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 734,
+      "input_tokens": 763,
+      "output_tokens": 15,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 5,
+      "type": "tool_call",
+      "tool": "list_document_sections",
+      "arguments": {},
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 6,
+      "type": "tool_result",
+      "tool": "list_document_sections",
+      "arguments": {},
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"document_title\": \"MASTER SERVICES AGREEMENT\", \"sections\": [{\"section_id\": \"1\", \"title\": \"Parties and Scope\"}, {\"section_id\": \"2\", \"title\": \"Definitions\"}, {\"section_id\": \"3\", \"title\": \"Services\"}, {\"section_id\": \"4.1\", \"title\": \"Payment Terms\"}, {\"section_id\": \"5\", \"title\": \"Confidentiality\"}, {\"section_id\": \"6\", \"title\": \"Termination\"}, {\"section_id\": \"7\", \"title\": \"Liability\"}, {\"section_id\": ... [clipped, 473 chars total]",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 7,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-PAY-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 732,
+      "input_tokens": 1026,
+      "output_tokens": 26,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-PAY-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 9,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-PAY-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Payment Terms\", \"params\": {}, \"rule_id\": \"CLAUSE-PAY-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"MEDIUM\", \"statement\": \"The document must contain a Payment Terms clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-PAY-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 10,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"VALUE-PAY-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1033,
+      "input_tokens": 1160,
+      "output_tokens": 25,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 11,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "VALUE-PAY-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 12,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "VALUE-PAY-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Payment Terms\", \"params\": {\"field\": \"payment_days\", \"operator\": \"<=\", \"unit\": \"days\", \"value\": 45}, \"rule_id\": \"VALUE-PAY-001\", \"rule_type\": \"VALUE_CONSTRAINT\", \"severity\": \"MEDIUM\", \"statement\": \"Payment terms must not exceed 45 days.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "VALUE-PAY-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 13,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1032,
+      "input_tokens": 1328,
+      "output_tokens": 29,
+      "thinking_tokens": 0,
+      "stop_reason": "MALFORMED_FUNCTION_CALL"
+    },
+    {
+      "seq": 14,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-LIAB-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 970,
+      "input_tokens": 1370,
+      "output_tokens": 27,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 15,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-LIAB-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 16,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-LIAB-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Liability\", \"params\": {}, \"rule_id\": \"CLAUSE-LIAB-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"HIGH\", \"statement\": \"The document must contain a Liability clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-LIAB-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 17,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-TERM-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 771,
+      "input_tokens": 1462,
+      "output_tokens": 26,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 18,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-TERM-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 19,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-TERM-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Termination\", \"params\": {}, \"rule_id\": \"CLAUSE-TERM-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"HIGH\", \"statement\": \"The document must contain a Termination clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-TERM-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 20,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 994,
+      "input_tokens": 1594,
+      "output_tokens": 27,
+      "thinking_tokens": 0,
+      "stop_reason": "MALFORMED_FUNCTION_CALL"
+    }
+  ],
+  "retries": 1,
+  "errors": [
+    "it was not a single JSON object",
+    "it was not a single JSON object"
+  ],
+  "final_response_raw": "",
+  "final_decision": null,
+  "output_validation": "unparseable",
+  "totals": {
+    "latency_ms": 7218,
+    "num_llm_calls": 8,
+    "num_tool_calls": 6,
+    "num_tool_errors": 1,
+    "num_redundant_calls": 0,
+    "input_tokens": 9338,
+    "output_tokens": 199,
+    "thinking_tokens": 0,
+    "total_tokens": 9537
+  },
+  "terminated_reason": "error"
+}

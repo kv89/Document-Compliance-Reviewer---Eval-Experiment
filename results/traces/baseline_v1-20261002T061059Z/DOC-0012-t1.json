@@ -1,0 +1,713 @@
+{
+  "trace_schema_version": "1.2",
+  "experiment_id": "baseline_v1",
+  "case_id": "DOC-0012",
+  "trial_id": 1,
+  "run_id": "baseline_v1-20261002T061059Z",
+  "timestamp_utc": "2026-10-02T06:19:15+00:00",
+  "config": {
+    "provider": "google-ai-studio",
+    "model_name": "gemini-3.5-flash-lite",
+    "model_tag": "gemini-3.5-flash-lite",
+    "model_version": "gemini-3.5-flash-lite",
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "top_k": null,
+    "seed": 7,
+    "max_output_tokens": 2048,
+    "thinking_level": "MINIMAL",
+    "max_steps": 20,
+    "runtime_version": "google-genai 2.25.0",
+    "python_version": "3.11.9",
+    "hardware_id": "arm64 Darwin 27.0.0",
+    "prompt_version": "p1",
+    "tool_set_version": "t1",
+    "agent_version": "v1",
+    "dataset_version": "v1-m1",
+    "policy_version": "v1"
+  },
+  "agent_input": {
+    "policy_id": "POL-001",
+    "policy_version": "v1",
+    "document_chars": 1509
+  },
+  "events": [
+    {
+      "seq": 1,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"POL-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 805,
+      "input_tokens": 635,
+      "output_tokens": 23,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 2,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 3,
+      "type": "tool_error",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": false,
+      "error": "UNKNOWN_RULE",
+      "result_summary": "{\"error\": \"UNKNOWN_RULE\", \"message\": \"No rule 'POL-001' in policy POL-001\", \"valid_rule_ids\": [\"CLAUSE-LIAB-001\", \"CLAUSE-PAY-001\", \"CLAUSE-TERM-001\", \"ENUM-LAW-001\", \"VALUE-PAY-001\"]}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 4,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-LIAB-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 716,
+      "input_tokens": 763,
+      "output_tokens": 27,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 5,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-LIAB-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 6,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-LIAB-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Liability\", \"params\": {}, \"rule_id\": \"CLAUSE-LIAB-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"HIGH\", \"statement\": \"The document must contain a Liability clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-LIAB-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 7,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-PAY-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 767,
+      "input_tokens": 897,
+      "output_tokens": 26,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-PAY-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 9,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-PAY-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Payment Terms\", \"params\": {}, \"rule_id\": \"CLAUSE-PAY-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"MEDIUM\", \"statement\": \"The document must contain a Payment Terms clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-PAY-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 10,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"CLAUSE-TERM-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 858,
+      "input_tokens": 1031,
+      "output_tokens": 26,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 11,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-TERM-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 12,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "CLAUSE-TERM-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Termination\", \"params\": {}, \"rule_id\": \"CLAUSE-TERM-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"HIGH\", \"statement\": \"The document must contain a Termination clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-TERM-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 13,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"ENUM-LAW-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 873,
+      "input_tokens": 1163,
+      "output_tokens": 25,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 14,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "ENUM-LAW-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 15,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "ENUM-LAW-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Governing Law\", \"params\": {\"allowed\": [\"India\", \"Singapore\", \"England and Wales\"], \"field\": \"jurisdiction\"}, \"rule_id\": \"ENUM-LAW-001\", \"rule_type\": \"ENUM_CONSTRAINT\", \"severity\": \"HIGH\", \"statement\": \"Governing law must be one of the approved jurisdictions.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "ENUM-LAW-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 16,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"VALUE-PAY-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1027,
+      "input_tokens": 1335,
+      "output_tokens": 25,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 17,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "VALUE-PAY-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 18,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "VALUE-PAY-001"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Payment Terms\", \"params\": {\"field\": \"payment_days\", \"operator\": \"<=\", \"unit\": \"days\", \"value\": 45}, \"rule_id\": \"VALUE-PAY-001\", \"rule_type\": \"VALUE_CONSTRAINT\", \"severity\": \"MEDIUM\", \"statement\": \"Payment terms must not exceed 45 days.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "VALUE-PAY-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 19,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"list_document_sections\", \"arguments\": {}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 778,
+      "input_tokens": 1503,
+      "output_tokens": 15,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 20,
+      "type": "tool_call",
+      "tool": "list_document_sections",
+      "arguments": {},
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 21,
+      "type": "tool_result",
+      "tool": "list_document_sections",
+      "arguments": {},
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"document_title\": \"MASTER SERVICES AGREEMENT\", \"sections\": [{\"section_id\": \"1\", \"title\": \"Parties and Scope\"}, {\"section_id\": \"2\", \"title\": \"Definitions\"}, {\"section_id\": \"3\", \"title\": \"Services\"}, {\"section_id\": \"4.1\", \"title\": \"Payment Terms\"}, {\"section_id\": \"5\", \"title\": \"Confidentiality\"}, {\"section_id\": \"6\", \"title\": \"Termination\"}, {\"section_id\": \"7\", \"title\": \"Liability\"}, {\"section_id\": ... [clipped, 473 chars total]",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 22,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"4.1\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1135,
+      "input_tokens": 1766,
+      "output_tokens": 23,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 23,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "4.1"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 24,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "4.1"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nCustomer shall pay all undisputed invoices promptly following receipt and in any event within a reasonable period. Invoices are issued monthly in arrears.\\n\\n\", \"char_end\": 689, \"char_start\": 532, \"section_id\": \"4.1\", \"title\": \"Payment Terms\"}",
+      "sections_returned": [
+        "4.1"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 25,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"6\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 840,
+      "input_tokens": 1871,
+      "output_tokens": 21,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 26,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "6"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 27,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "6"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nEither party may terminate this Agreement for convenience by giving 90 days written notice. Either party may terminate immediately for material breach that remains uncured after 14 days.\\n\\n\", \"char_end\": 1057, \"char_start\": 868, \"section_id\": \"6\", \"title\": \"Termination\"}",
+      "sections_returned": [
+        "6"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 28,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"7\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 776,
+      "input_tokens": 1981,
+      "output_tokens": 21,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 29,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "7"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 30,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "7"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nThe total aggregate liability of each party under this Agreement is limited to the total fees paid in the twelve months preceding the claim.\\n\\n\", \"char_end\": 1215, \"char_start\": 1072, \"section_id\": \"7\", \"title\": \"Liability\"}",
+      "sections_returned": [
+        "7"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 31,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"8\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 803,
+      "input_tokens": 2081,
+      "output_tokens": 21,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 32,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "8"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 33,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "8"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nThis Agreement is governed by the laws of Singapore, and the parties submit to the exclusive jurisdiction of its courts.\\n\\n\", \"char_end\": 1357, \"char_start\": 1234, \"section_id\": \"8\", \"title\": \"Governing Law\"}",
+      "sections_returned": [
+        "8"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 34,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"search_document\", \"arguments\": {\"query\": \"days\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1058,
+      "input_tokens": 2181,
+      "output_tokens": 17,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 35,
+      "type": "tool_call",
+      "tool": "search_document",
+      "arguments": {
+        "query": "days"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 36,
+      "type": "tool_result",
+      "tool": "search_document",
+      "arguments": {
+        "query": "days"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"match_count\": 1, \"query\": \"days\", \"results\": [{\"char_end\": 944, \"char_start\": 940, \"score\": 1.0, \"section_id\": \"6\", \"snippet\": \"\\nEither party may terminate this Agreement for convenience by giving 90 days written notice. Either party may terminate immediately for material breach that\", \"title\": \"Termination\"}]}",
+      "sections_returned": [
+        "6"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "thinking_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 37,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"final_answer\": {\n  \"status\": \"COMPLIANT\",\n  \"findings\": [],\n  \"summary\": \"The document contains all required clauses (Liability, Payment Terms, Termination, Governing Law), complies with the governing law restriction (Singapore), and payment terms do not specify a term exceeding 45 days.\"\n}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1164,
+      "input_tokens": 2317,
+      "output_tokens": 70,
+      "thinking_tokens": 0,
+      "stop_reason": "STOP"
+    }
+  ],
+  "retries": 0,
+  "errors": [],
+  "final_response_raw": "{\"final_answer\": {\n  \"status\": \"COMPLIANT\",\n  \"findings\": [],\n  \"summary\": \"The document contains all required clauses (Liability, Payment Terms, Termination, Governing Law), complies with the governing law restriction (Singapore), and payment terms do not specify a term exceeding 45 days.\"\n}}",
+  "final_decision": {
+    "status": "COMPLIANT",
+    "findings": [],
+    "summary": "The document contains all required clauses (Liability, Payment Terms, Termination, Governing Law), complies with the governing law restriction (Singapore), and payment terms do not specify a term exceeding 45 days."
+  },
+  "output_validation": "valid",
+  "totals": {
+    "latency_ms": 11600,
+    "num_llm_calls": 13,
+    "num_tool_calls": 12,
+    "num_tool_errors": 1,
+    "num_redundant_calls": 0,
+    "input_tokens": 19524,
+    "output_tokens": 340,
+    "thinking_tokens": 0,
+    "total_tokens": 19864
+  },
+  "terminated_reason": "final_answer"
+}

@@ -1,0 +1,506 @@
+{
+  "trace_schema_version": "1.0",
+  "experiment_id": "baseline_v1",
+  "case_id": "DOC-0002",
+  "trial_id": 1,
+  "run_id": "baseline_v1-20261001T182447Z",
+  "timestamp_utc": "2026-10-01T18:26:08+00:00",
+  "config": {
+    "provider": "google-ai-studio",
+    "model_name": "gemini-2.5-flash",
+    "model_tag": "gemini-2.5-flash",
+    "model_version": "gemini-2.5-flash",
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "top_k": null,
+    "seed": 7,
+    "max_output_tokens": 2048,
+    "max_steps": 12,
+    "runtime_version": "google-genai 2.25.0",
+    "python_version": "3.11.9",
+    "hardware_id": "arm64 Darwin 27.0.0",
+    "prompt_version": "p1",
+    "tool_set_version": "t1",
+    "agent_version": "v1",
+    "dataset_version": "v1-m1",
+    "policy_version": "v1"
+  },
+  "agent_input": {
+    "policy_id": "POL-001",
+    "policy_version": "v1",
+    "document_chars": 1466
+  },
+  "events": [
+    {
+      "seq": 1,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"rule_id\": \"POL-001\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1041,
+      "input_tokens": 635,
+      "output_tokens": 23,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 2,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 3,
+      "type": "tool_error",
+      "tool": "lookup_policy",
+      "arguments": {
+        "rule_id": "POL-001"
+      },
+      "ok": false,
+      "error": "UNKNOWN_RULE",
+      "result_summary": "{\"error\": \"UNKNOWN_RULE\", \"message\": \"No rule 'POL-001' in policy POL-001\", \"valid_rule_ids\": [\"CLAUSE-LIAB-001\", \"CLAUSE-PAY-001\", \"CLAUSE-TERM-001\", \"ENUM-LAW-001\", \"VALUE-PAY-001\"]}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 4,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"clause\": \"Limitation of Liability\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1329,
+      "input_tokens": 763,
+      "output_tokens": 20,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 5,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Limitation of Liability"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 6,
+      "type": "tool_error",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Limitation of Liability"
+      },
+      "ok": false,
+      "error": "UNKNOWN_CLAUSE",
+      "result_summary": "{\"error\": \"UNKNOWN_CLAUSE\", \"message\": \"No rule for clause 'Limitation of Liability'\", \"valid_clauses\": [\"Governing Law\", \"Liability\", \"Payment Terms\", \"Termination\"]}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 7,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"clause\": \"Liability\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1070,
+      "input_tokens": 845,
+      "output_tokens": 17,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 8,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Liability"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 9,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Liability"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Liability\", \"params\": {}, \"rule_id\": \"CLAUSE-LIAB-001\", \"rule_type\": \"CLAUSE_REQUIRED\", \"severity\": \"HIGH\", \"statement\": \"The document must contain a Liability clause.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "CLAUSE-LIAB-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 10,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"search_document\", \"arguments\": {\"query\": \"Liability\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1663,
+      "input_tokens": 969,
+      "output_tokens": 17,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 11,
+      "type": "tool_call",
+      "tool": "search_document",
+      "arguments": {
+        "query": "Liability"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 12,
+      "type": "tool_result",
+      "tool": "search_document",
+      "arguments": {
+        "query": "Liability"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"match_count\": 1, \"query\": \"Liability\", \"results\": [{\"char_end\": 1059, \"char_start\": 1050, \"score\": 1.0, \"section_id\": \"7\", \"snippet\": \"\\nThe total aggregate liability of each party under this Agreement is limited to the total fees paid in the twe\", \"title\": \"Liability\"}]}",
+      "sections_returned": [
+        "7"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 13,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"7\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1112,
+      "input_tokens": 1100,
+      "output_tokens": 21,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 14,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "7"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 15,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "7"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nThe total aggregate liability of each party under this Agreement is limited to the total fees paid in the twelve months preceding the claim.\\n\\n\", \"char_end\": 1172, \"char_start\": 1029, \"section_id\": \"7\", \"title\": \"Liability\"}",
+      "sections_returned": [
+        "7"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 16,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"lookup_policy\", \"arguments\": {\"clause\": \"Governing Law\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1141,
+      "input_tokens": 1200,
+      "output_tokens": 19,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 17,
+      "type": "tool_call",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Governing Law"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 18,
+      "type": "tool_result",
+      "tool": "lookup_policy",
+      "arguments": {
+        "clause": "Governing Law"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"policy_id\": \"POL-001\", \"policy_version\": \"v1\", \"rules\": [{\"clause\": \"Governing Law\", \"params\": {\"allowed\": [\"India\", \"Singapore\", \"England and Wales\"], \"field\": \"jurisdiction\"}, \"rule_id\": \"ENUM-LAW-001\", \"rule_type\": \"ENUM_CONSTRAINT\", \"severity\": \"HIGH\", \"statement\": \"Governing law must be one of the approved jurisdictions.\"}]}",
+      "sections_returned": [],
+      "rules_returned": [
+        "ENUM-LAW-001"
+      ],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 19,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"search_document\", \"arguments\": {\"query\": \"Governing Law\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1547,
+      "input_tokens": 1366,
+      "output_tokens": 19,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 20,
+      "type": "tool_call",
+      "tool": "search_document",
+      "arguments": {
+        "query": "Governing Law"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 21,
+      "type": "tool_result",
+      "tool": "search_document",
+      "arguments": {
+        "query": "Governing Law"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"match_count\": 0, \"query\": \"Governing Law\", \"results\": []}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 22,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"search_document\", \"arguments\": {\"query\": \"jurisdiction\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1097,
+      "input_tokens": 1411,
+      "output_tokens": 18,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 23,
+      "type": "tool_call",
+      "tool": "search_document",
+      "arguments": {
+        "query": "jurisdiction"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 24,
+      "type": "tool_result",
+      "tool": "search_document",
+      "arguments": {
+        "query": "jurisdiction"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"match_count\": 1, \"query\": \"jurisdiction\", \"results\": [{\"char_end\": 1297, \"char_start\": 1285, \"score\": 1.0, \"section_id\": \"8\", \"snippet\": \"t is governed by the laws of Singapore, and the parties submit to the exclusive jurisdiction of its courts.\\n\\n\", \"title\": \"Governing Law\"}]}",
+      "sections_returned": [
+        "8"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 25,
+      "type": "llm_call",
+      "tool": null,
+      "arguments": null,
+      "ok": null,
+      "error": null,
+      "result_summary": "{\"tool\": \"get_document_section\", \"arguments\": {\"section_id\": \"8\"}}",
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": 1391,
+      "input_tokens": 1550,
+      "output_tokens": 21,
+      "stop_reason": "STOP"
+    },
+    {
+      "seq": 26,
+      "type": "tool_call",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "8"
+      },
+      "ok": null,
+      "error": null,
+      "result_summary": null,
+      "sections_returned": [],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    },
+    {
+      "seq": 27,
+      "type": "tool_result",
+      "tool": "get_document_section",
+      "arguments": {
+        "section_id": "8"
+      },
+      "ok": true,
+      "error": null,
+      "result_summary": "{\"body\": \"\\nThis Agreement is governed by the laws of Singapore, and the parties submit to the exclusive jurisdiction of its courts.\\n\\n\", \"char_end\": 1314, \"char_start\": 1191, \"section_id\": \"8\", \"title\": \"Governing Law\"}",
+      "sections_returned": [
+        "8"
+      ],
+      "rules_returned": [],
+      "latency_ms": null,
+      "input_tokens": null,
+      "output_tokens": null,
+      "stop_reason": null
+    }
+  ],
+  "retries": 0,
+  "errors": [
+    "PROVIDER_ERROR: ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\\nPlease retry in 47.521013865s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '47s'}]}}"
+  ],
+  "final_response_raw": "",
+  "final_decision": null,
+  "output_validation": "valid",
+  "totals": {
+    "latency_ms": 11391,
+    "num_llm_calls": 9,
+    "num_tool_calls": 9,
+    "num_tool_errors": 2,
+    "num_redundant_calls": 0,
+    "input_tokens": 9839,
+    "output_tokens": 175,
+    "total_tokens": 10014
+  },
+  "terminated_reason": "error"
+}

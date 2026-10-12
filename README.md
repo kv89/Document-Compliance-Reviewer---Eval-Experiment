@@ -66,32 +66,24 @@ proven against cases whose answers are already known, before the agent exists.
 
 ## Status
 
-Milestone 1, steps 0-7 complete. No LLM involved yet.
+Milestone 1 baseline sweep complete. Dataset `v1`, signed off 2026-10-02, hash verified.
 
 | Step | State |
 |---|---|
-| 0 scaffold | done |
-| 1 schemas and invariants | done |
-| 2 policy `POL-001`, 5 rules | done |
-| 3 section splitter and 4 tools | done |
-| 4 generator, dataset `v1-m1`, 14 cases | done |
-| 5 dataset validation | done: automated gate passed, signed off 2026-10-01, hash verified |
-| 6 deterministic, evidence and safety evaluators | done |
-| 7 REF-0 and REF-1 reference baselines | done |
-| 8 agent loop | built and unit tested against a scripted client; not yet run against the live model |
+| 0-7 scaffold, schemas, policy, tools, generator, validation, evaluators, REF-0/REF-1 | done |
+| 8 agent loop | done: run live on `gemini-3.5-flash-lite`, 140-case sample (20 per category, 1 trial each) |
 
-Reference results on `v1-m1`: `results/processed/references-v1-m1.md`. The sign-off is bound to the
-sha256 of `ground_truth.jsonl`, so regenerating the dataset invalidates it and the runner stops
-treating the output as reportable.
+Results: `results/processed/baseline_v1-20261002T092914Z.md`. Raw rows are in
+`results/raw/baseline_v1-20261002T092914Z/trials.jsonl` and per-trial traces in
+`results/traces/`; both are committed so every reported number can be checked. Reference baselines
+on the 14-case set: `results/processed/references-v1-m1.md`. The sign-off is bound to the sha256
+of `ground_truth.jsonl`, so regenerating the dataset invalidates it.
 
-Next action: run step 8 against the live model and record per-case wall clock for the §7 runtime
-gate.
+Next: see `docs/next-steps.md`.
 
 ```bash
 export GOOGLE_API_KEY=...
 uv run python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml --dry-run
-uv run python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml --limit 2
-uv run python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml
 ```
 
 The loop itself is tested with `ScriptedClient`, so the whole suite runs with no key and no network.

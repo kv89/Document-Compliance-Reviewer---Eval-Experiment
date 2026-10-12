@@ -1,31 +1,38 @@
-# Next steps to Milestone 1 completion and blog handoff
+# Next steps after the baseline sweep
 
-1. Re-run `--limit 2` to confirm the `max_steps=20` fix (DOC-0001 passes again, DOC-0002 reaches
-   `final_answer` instead of `MAX_STEPS`).
-2. Check quota remaining today on `gemini-3.5-flash-lite` before the next step — the report's
-   "Request budget" section shows mean requests per trial, compare against the daily cap.
-3. Run the full 14-case Milestone 1 set (`experiments.run_baseline`, no `--limit`), 1 trial per
-   case, confirm no `stopped_early`.
-4. Inspect `results/processed/<run_id>.md`: all 6 evaluation layers scored, safety invariants
-   S1-S8 checked, no voided trials.
-5. Confirm REF-0 and REF-1 baseline numbers already exist for the same dataset and schema 1.2 —
-   re-run them if the schema changed since they were last generated.
-6. Decide the full-matrix scale (175 cases x 3 trials) is feasible under the free-tier daily
-   quota, using the step 4 report's section 7 runtime/request gate numbers. If not feasible,
-   resolve it (upgrade tier, reduce trials, or document the constraint).
-7. Get fresh human sign-off for dataset v1 at full scale (175 cases), per
-   `experiments/signoff.py`'s hash-binding rule — a new sign-off is needed if the sweep scope
-   changes from Milestone 1's 14 cases.
-8. Run the full 175x3 matrix for the baseline (`gemini-3.5-flash-lite`).
-9. Run the Experiment C comparator (`gemma-4-31b-it`) — first check it accepts the JSON
-   tool-calling protocol (flagged condition in spec section 6.4, not yet tested).
-10. Run the remaining experiments per spec section 29 (A-F) and REF-2, as time and quota allow —
-    at minimum whichever ones the blog series needs.
-11. Write the one-page Milestone 1 report (spec deliverable) summarizing the clean run.
-12. Pull together the evidence set for blog handoff: `docs/decisions.md` (narrative and timeline),
-    `docs/implementation-spec-v2.md` (method and rigor), `results/processed/*.md` and
-    `results/raw/*/trials.jsonl` (concrete numbers and examples).
-13. Push the repository to git (user's call, deferred until now per "skip git, push at the end").
+Replaces the earlier list, whose steps 1-5 and 7 are done. Scope and order of the sweep are
+recorded in `docs/decisions.md`, 2026-10-09.
 
-Blog writing can start once steps 1-10 (or whichever experiments are in scope) and step 12 are
-done.
+## Where the run stands (2026-10-12)
+
+The 140-case sample is complete and verified: run `baseline_v1-20261002T092914Z`, 20 cases in each of
+7 categories, 0 voided trials, 0 `NO_ANSWER`, no "Incomplete run" banner. Strict stratum: status
+accuracy 101/120, full case pass 69/120, evidence accuracy 0.28, 46 safety violations (38 are S3,
+invented char offsets). Report: `results/processed/baseline_v1-20261002T092914Z.md`.
+
+No daily resume is needed any more. If a re-run is ever required, use
+`--resume baseline_v1-20261002T092914Z` (it reports 0 cases to run) or a new run id. The resume
+command and failure table from the 2026-10-09 runbook are in git history.
+
+## After the sweep
+
+1. Done: report checked (140 executions, 20 per category, no banner).
+2. Read the report with the known caveat in mind: the agent quotes evidence verbatim but invents
+   `char_start`/`char_end` (safety check S3, evidence accuracy), and tends to answer `COMPLIANT`
+   on contradictory documents. Do not "fix" `p1` to improve the number; a better prompt is a `p2`
+   arm under Experiment A.
+3. Re-run the reference baselines on the same sample if the results schema changed since they were
+   last generated (`experiments.run_references`), so the comparison table is like for like.
+4. Repeats for trial consistency: re-run a stratified 7 x 4 = 28 case subset twice more
+   (about one extra day of quota). This needs a small change to the runner; decide before starting.
+5. Write the one-page Milestone 1 report required by spec section 29.
+6. Experiment C comparator (`gemma-4-31b-it`): first check that it accepts the JSON tool protocol
+   (spec section 6.4). Its quota is a separate bucket, so it can run on the same days.
+7. Collect the blog evidence set: `docs/decisions.md` (narrative), `docs/implementation-spec-v2.md`
+   (method), `results/processed/*.md` and `results/raw/*/trials.jsonl` (numbers).
+8. Commit and push (raw rows and traces are now tracked; see decisions.md, 2026-10-12).
+
+## Open housekeeping
+
+- Records do not show which key or project each day used. If wanted, add a non-secret key
+  fingerprint to the trace config (schema change, needs a decision-log entry).
