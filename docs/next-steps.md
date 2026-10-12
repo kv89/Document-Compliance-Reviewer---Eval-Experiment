@@ -11,8 +11,7 @@ accuracy 101/120, full case pass 69/120, evidence accuracy 0.28, 46 safety viola
 invented char offsets). Report: `results/processed/baseline_v1-20261002T092914Z.md`.
 
 No daily resume is needed any more. If a re-run is ever required, use
-`--resume baseline_v1-20261002T092914Z` (it reports 0 cases to run) or a new run id. The resume
-command and failure table from the 2026-10-09 runbook are in git history.
+`--resume baseline_v1-20261002T092914Z` (it reports 0 cases to run) or a new run id.
 
 ## After the sweep
 
@@ -30,7 +29,6 @@ command and failure table from the 2026-10-09 runbook are in git history.
    (spec section 6.4). Its quota is a separate bucket, so it can run on the same days.
 7. Collect the blog evidence set: `docs/decisions.md` (narrative), `docs/implementation-spec-v2.md`
    (method), `results/processed/*.md` and `results/raw/*/trials.jsonl` (numbers).
-8. Commit and push (raw rows and traces are now tracked; see decisions.md, 2026-10-12).
 
 ## Open housekeeping
 

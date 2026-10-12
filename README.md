@@ -16,6 +16,8 @@ eight-part blog series on AI agent evaluation.
 | [docs/implementation-spec-v2.md](docs/implementation-spec-v2.md) | **Authoritative.** Build from this. |
 | [docs/experiment-design.md](docs/experiment-design.md) | Original design (v1). Historical intent only. |
 | [docs/decisions.md](docs/decisions.md) | Append-only log of post-v2 changes. |
+| [docs/handoff.md](docs/handoff.md) | **Start here on a new machine.** State, setup, next steps. |
+| [docs/blog-evidence.md](docs/blog-evidence.md) | Blog numbers, generated from the trial rows. |
 
 Where v1 and v2 disagree, v2 wins. Appendix A of the spec maps every correction.
 
