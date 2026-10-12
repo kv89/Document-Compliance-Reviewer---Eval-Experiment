@@ -62,8 +62,13 @@ uv run python -m experiments.run_baseline --config experiments/configs/baseline_
 
 ## Next steps
 
-1. REF-0 and REF-1 on the same 140-case sample (the reference results on file are the 14-case
-   set); build REF-2 (single-shot, about 140 requests).
+1. REF-0 and REF-1 on the same 140-case sample. The reference results on file are the 14-case set.
+   `experiments/run_references.py` takes only `--dataset` and runs every case in it (175 for `v1`),
+   so first add a sample filter that reuses `select_cases(cases, 20, 7, prefer=<measured ids>)`
+   from `experiments/sampling.py`, with `prefer` taken from the baseline run's rows. Then run
+   `uv run python -m experiments.run_references --dataset v1`. Needs no key and no network.
+   Add a test, and a `decisions.md` entry if the report format changes. Then build REF-2
+   (single-shot model call, about 140 requests, needs the key).
 2. Repeats for consistency: 28-case stratified subset, two more trials (needs a decision-log entry,
    since the spec asks for 3 trials per case).
 3. One controlled change: Experiment A, prompt `p2`, aimed at the offset failure and the wasted
