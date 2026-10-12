@@ -38,6 +38,11 @@ agent:
 dataset:
   version: v1
   policy_id: POL-001
+  # 20 per category is the smallest sample at which spec 7 lets a category be reported as a
+  # percentage. Cases are drawn with a seeded shuffle and run category-interleaved, so a daily-quota
+  # stop leaves a balanced sample. docs/decisions.md, 2026-10-09.
+  cases_per_category: 20
+  sample_seed: 7
 
 run:
   trials_per_case: 1  # full 175-case matrix at 1 trial/case; scale to 3 trials once request budget is confirmed (section 17)

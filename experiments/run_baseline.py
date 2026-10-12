@@ -4,6 +4,7 @@ Usage:
     export GOOGLE_API_KEY=...
     python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml
     python -m experiments.run_baseline --config ... --limit 2   # smoke test, 2 cases
+    python -m experiments.run_baseline --config ... --resume <run_id>   # continue after a quota stop
 
 Three behaviours here are measurement decisions:
 
@@ -12,6 +13,9 @@ Three behaviours here are measurement decisions:
   answer (spec section 6.3).
 - **A trial that produces no answer still produces a row.** Dropping failed runs would inflate
   every other metric by removing exactly the hardest cases from the denominator.
+- **A sweep is resumable and balanced.** Cases run in a seeded, category-interleaved order
+  (`experiments/sampling.py`), and each row is appended as it is produced, so a quota stop leaves a
+  balanced partial sample and `--resume` continues it (docs/decisions.md, 2026-10-09).
 - **Per-case wall clock is reported.** Section 7's runtime gate needs it before the full matrix is
   sized, and it is the whole reason Milestone 1 runs 14 cases rather than 175.
 """
@@ -32,17 +36,40 @@ from agent.llm.client import GeminiClient, HarnessError, QuotaPolicy
 from agent.prompts.p1 import PROMPT_VERSION
 from agent.schemas.loaders import (
     REPO_ROOT,
+    append_jsonl,
     load_document,
     load_ground_truth,
     load_policy,
-    write_jsonl,
+    read_jsonl,
 )
 from agent.schemas.results import TrialRow
 from agent.schemas.trace import RunConfig
 from agent.tools.toolset import TOOL_SET_VERSION
 from analysis.scripts.aggregate import summarize
 from evaluation.deterministic.evaluate import evaluate_case, no_answer_row, to_row
+from experiments.sampling import select_cases
 from experiments.signoff import signoff_status
+
+
+def latest_rows(rows: list[TrialRow]) -> list[TrialRow]:
+    """Last row wins per (case, trial). Files are append-only, so a retried void row is superseded
+    by the row written after it rather than deleted."""
+    latest: dict[tuple[str, int], TrialRow] = {}
+    for row in rows:
+        latest[(row.case_id, row.trial_id)] = row
+    return list(latest.values())
+
+
+def check_resume_identity(rows: list[TrialRow], expected: dict) -> None:
+    """A resumed run mixing two models or prompts would be one result built from two experiments."""
+    for row in rows:
+        for field, want in expected.items():
+            got = getattr(row, field)
+            if got != want:
+                raise SystemExit(
+                    f"Refusing to resume: {row.case_id} was run with {field}={got!r} but this "
+                    f"config has {want!r}. A resumed run must be one experiment."
+                )
 
 
 def load_config(path: Path) -> dict:
@@ -86,6 +113,12 @@ def main() -> None:
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--limit", type=int, default=None, help="run only the first N cases")
     parser.add_argument(
+        "--resume",
+        metavar="RUN_ID",
+        default=None,
+        help="continue an earlier run: measured trials are kept, voided ones are retried",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="validate config, dataset and sign-off without calling the model",
@@ -101,18 +134,59 @@ def main() -> None:
     experiment_id = config["experiment_id"]
     dataset_version = config["dataset"]["version"]
 
-    cases = load_ground_truth(dataset_version)
-    policy = load_policy(cases[0].policy_id)
+    all_cases = load_ground_truth(dataset_version)
+    policy = load_policy(all_cases[0].policy_id)
+    trials_per_case = int(config["run"]["trials_per_case"])
+
+    prior: list[TrialRow] = []
+    if args.resume:
+        prior_path = REPO_ROOT / "results" / "raw" / args.resume / "trials.jsonl"
+        if not prior_path.exists():
+            raise SystemExit(f"Cannot resume {args.resume!r}: {prior_path} does not exist.")
+        prior = latest_rows(read_jsonl(prior_path, TrialRow))
+    measured = [r for r in prior if not r.harness_error]
+    done = {(r.case_id, r.trial_id) for r in measured}
+
+    dataset_cfg = config["dataset"]
+    # The sample is fixed by the config, not by what has run: `prefer` only reuses cases already
+    # measured and cannot change which cases belong to it.
+    cases = select_cases(
+        all_cases,
+        dataset_cfg.get("cases_per_category"),
+        int(dataset_cfg.get("sample_seed", 7)),
+        prefer={r.case_id for r in measured},
+    )
+    selected_ids = {c.case_id for c in cases}
     if args.limit:
         cases = cases[: args.limit]
+    todo = [
+        c
+        for c in cases
+        if any((c.case_id, t) not in done for t in range(1, trials_per_case + 1))
+    ]
 
     ready, reason = signoff_status(dataset_version)
     print(f"dataset sign-off: {'verified' if ready else 'MISSING'} — {reason}")
 
     run_config = build_run_config(config, dataset_version, policy.policy_version)
+    if args.resume:
+        check_resume_identity(
+            prior,
+            {
+                "experiment_id": experiment_id,
+                "dataset_version": dataset_version,
+                "agent_version": run_config.agent_version,
+                "prompt_version": run_config.prompt_version,
+                "tool_set_version": run_config.tool_set_version,
+                "model_name": run_config.model_name,
+                "temperature": run_config.temperature,
+                "seed": run_config.seed,
+            },
+        )
     print(
-        f"{experiment_id}: {len(cases)} cases x {config['run']['trials_per_case']} trial(s) "
-        f"on {run_config.model_name}"
+        f"{experiment_id}: {len(cases)} cases x {trials_per_case} trial(s) "
+        f"on {run_config.model_name}; {len(measured)} trials already measured, "
+        f"{len(todo)} cases to run"
     )
     if args.dry_run:
         print("dry run: config, dataset and sign-off check complete. No model was called.")
@@ -156,19 +230,24 @@ def main() -> None:
             f"{run_config.model_version or 'nothing'}"
         )
 
-    run_id = f"{experiment_id}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    run_id = args.resume or (
+        f"{experiment_id}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+    )
     trace_dir = REPO_ROOT / "results" / "traces" / run_id
     trace_dir.mkdir(parents=True, exist_ok=True)
 
-    rows: list[TrialRow] = []
+    rows_path = REPO_ROOT / "results" / "raw" / run_id / "trials.jsonl"
+    rows: list[TrialRow] = list(prior)
     wall_clock: list[float] = []
     attempted = 0
     stopped_early = ""
-    for case in cases:
+    for case in todo:
         if stopped_early:
             break
         document = load_document(case)
-        for trial_id in range(1, int(config["run"]["trials_per_case"]) + 1):
+        for trial_id in range(1, trials_per_case + 1):
+            if (case.case_id, trial_id) in done:
+                continue
             agent = Agent(client, max_steps=run_config.max_steps)
             started = time.monotonic()
             try:
@@ -221,6 +300,8 @@ def main() -> None:
                     trace_path=relative,
                 )
             rows.append(row)
+            # Written per trial, not at the end: a crash or Ctrl-C must not lose paid-for rows.
+            append_jsonl(rows_path, [row])
             attempted += 1
             print(
                 f"  {case.case_id} trial {trial_id}: {row.actual_status} "
@@ -239,18 +320,22 @@ def main() -> None:
                 # measured, and say so in the report.
                 stopped_early = (
                     f"the daily free-tier quota was exhausted after {attempted} of "
-                    f"{len(cases) * int(config['run']['trials_per_case'])} planned trials"
+                    f"{len(todo) * trials_per_case} planned trials"
                 )
                 print(f"  stopping: {stopped_early}")
                 break
 
-    out_dir = REPO_ROOT / "results" / "raw" / run_id
-    written = write_jsonl(out_dir / "trials.jsonl", rows)
-    print(f"{written} rows -> {out_dir / 'trials.jsonl'}")
+    print(f"{attempted} rows appended -> {rows_path}")
 
+    # Report the current state of the sample, once per (case, trial). Rows for cases outside the
+    # sample (adopted from an earlier run, not needed) stay on disk but not in the report.
+    rows = [r for r in latest_rows(rows) if r.case_id in selected_ids]
     voided = [r for r in rows if r.harness_error]
     scored = [r for r in rows if not r.harness_error]
     llm_calls = [r.num_llm_calls for r in rows if r.num_llm_calls]
+    planned = len(selected_ids) * trials_per_case
+    if len(scored) < planned and not stopped_early:
+        stopped_early = f"only {len(scored)} of {planned} planned trials have a measured row"
 
     report = [f"# {experiment_id} — dataset `{dataset_version}`", ""]
     if ready:
@@ -291,7 +376,8 @@ def main() -> None:
             "",
             "## Runtime (spec section 7 gate)",
             "",
-            f"- trials: {len(wall_clock)}",
+            f"- trials: {len(wall_clock)}"
+            + (" (this session only)" if args.resume else ""),
             f"- mean per trial: {mean:.1f} s",
             f"- slowest trial: {max(wall_clock):.1f} s",
             f"- total: {total / 60:.1f} min",
