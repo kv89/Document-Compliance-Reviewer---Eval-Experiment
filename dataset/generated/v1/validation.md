@@ -247,7 +247,7 @@ reportable otherwise.
 
 | field | value |
 |---|---|
-| reviewer | Vishal Kalaskar (vishal.kalaskar@searce.com) |
+| reviewer | Vishal Kalaskar (mail.vishaldk@gmail.com) |
 | date | 2026-10-02 |
 | cases reviewed | 15 / 175 (stratified spot-check, all 7 categories, spec section 9.3) |
 | result | accepted |

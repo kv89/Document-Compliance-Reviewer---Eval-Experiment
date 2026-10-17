@@ -336,7 +336,7 @@ This dataset is signed off. The sha256 below ties the sign-off to the exact `gro
 
 | field | value |
 |---|---|
-| reviewer | Vishal Kalaskar (vishal.kalaskar@searce.com) |
+| reviewer | Vishal Kalaskar (mail.vishaldk@gmail.com) |
 | date | 2026-10-01 |
 | cases reviewed | 14 / 14 |
 | result | accepted |
