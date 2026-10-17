@@ -1,7 +1,7 @@
 """Blog evidence digest: every number below is computed from trials.jsonl, none is typed by hand.
 
 Usage:
-    uv run python -m analysis.scripts.evidence_digest > docs/blog-evidence.md
+    uv run python -m analysis.scripts.evidence_digest > docs/reports/blog-evidence.md
 
 Reads the run in RUN_ID, restricts it to the pre-registered sample (experiments/sampling.py, 20 per
 category, seed 7), and prints counts with their denominators. Counts, not percentages, wherever a
@@ -35,7 +35,10 @@ def load() -> list[dict]:
             load_ground_truth("v1"), 20, 7, prefer={r["case_id"] for r in measured}
         )
     }
-    return [r for r in measured if r["case_id"] in ids]
+    # Trial 1 only. Trials 2 and 3 exist for a 28-case consistency subset, and pooling them would
+    # weight those cases three times (docs/decisions/decisions.md, 2026-10-17). Consistency is
+    # reported in the run's processed report, not here.
+    return [r for r in measured if r["case_id"] in ids and r["trial_id"] == 1]
 
 
 def failed_tool_calls(case_ids: set[str]) -> tuple[int, int, Counter]:

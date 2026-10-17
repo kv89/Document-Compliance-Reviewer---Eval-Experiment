@@ -98,8 +98,16 @@ def _bool_rate(rows: list[TrialRow], field: str) -> tuple[int, int]:
     return hits, total
 
 
-def summarize(rows: list[TrialRow], title: str) -> str:
-    """Render a markdown report for one configuration."""
+def summarize(
+    rows: list[TrialRow], title: str, consistency_rows: list[TrialRow] | None = None
+) -> str:
+    """Render a markdown report for one configuration.
+
+    `consistency_rows` measures trial consistency on rows other than the headline ones: a run that
+    repeats only a subset of cases reports trial 1 as its headline, so that repeated cases are not
+    weighted three times, and takes consistency from all trials (docs/decisions/decisions.md,
+    2026-10-17).
+    """
     strict = [r for r in rows if r.scoring_mode == "strict"]
     accept = [r for r in rows if r.scoring_mode == "accept_set"]
     cases = {r.case_id for r in rows}
@@ -118,7 +126,7 @@ def summarize(rows: list[TrialRow], title: str) -> str:
     if skipped:
         add(f"- safety checks skipped for want of a trace: {', '.join(skipped)} "
             "— skipped, not passed")
-    agree, multi = trial_consistency(rows)
+    agree, multi = trial_consistency(rows if consistency_rows is None else consistency_rows)
     add(f"- trial consistency: {agree}/{multi} cases where all trials agreed on status"
         if multi else "- trial consistency: not measurable, one trial per case")
     add("")

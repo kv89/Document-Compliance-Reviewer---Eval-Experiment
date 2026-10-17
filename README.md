@@ -1,101 +1,173 @@
 # Document Compliance Reviewer — AI Agent Evaluation Experiment
 
-A small, reproducible AI agent that reviews plain-text documents against a compliance
-policy.
+A small, reproducible AI agent that reviews plain-text documents against a compliance policy.
 
 **The agent is not the product. The measurement is.** This repository is a controlled experimental
 system for investigating how AI agents should be evaluated: what counts as success, how to evaluate
 tool use and trajectories, when deterministic evaluators suffice, when an LLM judge helps, how
-reliable that judge is, and how agent evaluation fits into CI/CD. It supplies the evidence for an
-eight-part blog series on AI agent evaluation.
+reliable that judge is, and how agent evaluation fits into CI/CD. It supplies the empirical evidence
+for an eight-part blog series on AI agent evaluation.
 
-## Read first
+---
+
+## 📖 Essential Documentation
+
+The project follows a strict **pre-registration and specification-first** methodology:
 
 | Document | Role |
 |---|---|
-| [docs/implementation-spec-v2.md](docs/implementation-spec-v2.md) | **Authoritative.** Build from this. |
-| [docs/experiment-design.md](docs/experiment-design.md) | Original design (v1). Historical intent only. |
-| [docs/decisions.md](docs/decisions.md) | Append-only log of post-v2 changes. |
-| [docs/handoff.md](docs/handoff.md) | **Start here on a new machine.** State, setup, next steps. |
-| [docs/blog-evidence.md](docs/blog-evidence.md) | Blog numbers, generated from the trial rows. |
+| [docs/guides/what-we-are-doing.md](docs/guides/what-we-are-doing.md) | **Start Here.** Plain-language, step-by-step explanation of what the project does and why. |
+| [docs/specs/implementation-spec-v2.md](docs/specs/implementation-spec-v2.md) | **Authoritative Specification.** Complete schemas, evaluation layers, constraints, baselines, and CI gates. |
+| [docs/decisions/decisions.md](docs/decisions/decisions.md) | **Append-Only Decision Log.** Every post-v2 methodology, parameter, and runner change with rationale and affected experiments. |
+| [docs/guides/code-review-walkthrough.md](docs/guides/code-review-walkthrough.md) | **Code Walkthrough.** Traces execution flow and function call sequence of a run from entry point to report. |
+| [docs/reports/blog-evidence.md](docs/reports/blog-evidence.md) | **Blog Evidence Digest.** Machine-extracted metrics, safety breakdown, and trace pointers for the blog series. |
+| [docs/archive/v1-experiment-design.md](docs/archive/v1-experiment-design.md) | **Historical Archive.** Superseded version 1 experiment design specification. |
 
-Where v1 and v2 disagree, v2 wins. Appendix A of the spec maps every correction.
+---
 
-## Two rules that govern all work here
+## 🎯 How the Experiment Works
 
-1. **Design before results** (spec §2). Schemas, metric denominators, matching rules, gate
-   thresholds and reporting limits are fixed in the spec *before* data is generated. Never change a
-   definition because a result looked bad. If a definition is genuinely wrong, fix it, log it in
-   `docs/decisions.md`, and re-run the affected configurations from scratch.
-2. **Every quantitative claim is traceable** to `experiment_id` + `dataset_version` +
-   `agent_version`. No invented numbers, no hypothetical results presented as experimental ones.
+A run points the agent at contract-like synthetic documents evaluated against policy `POL-001` (5 rules: Payment Terms, Termination, Liability, Payment Cap, and Governing Law). For each document, the agent:
 
-## Layout
+1. Reads the document and policy.
+2. Calls JSON-protocol tools (`search_document`, `get_document_section`, `lookup_policy`).
+3. Emits a structured verdict: `COMPLIANT`, `NON_COMPLIANT`, or `NEEDS_REVIEW` with exact evidence quotes and offsets.
 
-```
-agent/        the visible Python agent loop, prompts, tools, schemas
-baselines/    non-agent reference baselines (majority class, regex, single-shot)
-dataset/      generator, policies, generated cases + ground truth
-evaluation/   deterministic / safety / trajectory / deepeval / judges
-experiments/  one config file per experiment
-results/      raw traces and trial rows (append-only), processed tables
-analysis/     notebooks and scripts
-tests/        unit tests, incl. evaluator tests against hand-built fixtures
-```
+Every model request, tool call, token count, and step is recorded in an immutable trace. The agent is never graded on self-reported assertions; it is graded on what the trace proves it did.
 
-## Setup
+### The 7 Test Categories
+
+The dataset uses a stratified diagnostic distribution (25 cases per category in `v1`, 175 total; 20 per category sampled in baseline runs, 140 total):
+
+| Category | Tested Failure Mode | Scoring Stratum |
+|---|---|---|
+| `compliant` | Clean document obeying all rules | Strict (`COMPLIANT`) |
+| `missing_clause` | A mandatory clause is absent | Strict (`NON_COMPLIANT`) |
+| `incorrect_value` | Clause present but violates constraint (e.g. payment > 30 days) | Strict (`NON_COMPLIANT`) |
+| `multiple_violations` | Two or more rules violated simultaneously | Strict (`NON_COMPLIANT`) |
+| `contradictory` | Document contradicts itself across sections | Strict (`NON_COMPLIANT`) |
+| `ambiguous` | Document genuinely unresolvable against policy | Accept-set (`NEEDS_REVIEW`) |
+| `distractor` | Text looks like a violation but is legally irrelevant (false-positive probe) | Strict (`COMPLIANT`) |
+
+### Six Evaluation Layers
+
+Each trial is graded independently across 6 layers:
+1. **Layer 1 — Outcome**: Status correctness and exact finding classification.
+2. **Layer 2 — Evidence**: Cited section accuracy, verbatim quotation check, and character offset consistency.
+3. **Layer 3 — Tool Use**: Tool selection validity, argument schema conformance, and redundant call count.
+4. **Layer 4 — Trajectory**: Loop detection, recovery after errors, step efficiency, and task completion.
+5. **Layer 5 — Operational Safety**: 8 deterministic invariant checks (S1–S8, including S2 against fabricated quotes and S3 against invented offsets).
+6. **Layer 6 — Efficiency**: Latency, request budget, and input/output/hidden reasoning token counts.
+
+---
+
+## 📊 Current State & Baseline Findings
+
+Milestone 1 baseline sweep is complete on dataset `v1` (run `baseline_v1-20261002T092914Z`, model `gemini-3.5-flash-lite`, prompt `p1`, 140 cases, 0 voided, 0 `NO_ANSWER`).
+
+### Comparison Across Baselines (140-Case Sample)
+
+REF-2 is run `ref2_single_shot-20261017T150310Z` (same model and settings as the agent, one call per case, no tools; 140 measured, 0 voided). Full tables: [results/processed/references-v1-s7-n20.md](results/processed/references-v1-s7-n20.md).
+
+| Metric | REF-0 (Majority Class) | REF-1 (Deterministic Regex) | REF-2 (Single Shot, no tools) | Agent v1 (`p1`, Flash-Lite) |
+|---|---|---|---|---|
+| **Status accuracy** (120 strict cases) | 80/120 (67%) | 100/120 (83%) | **109/120 (91%)** | 101/120 (84%) |
+| **Full case pass** (all checks) | 0/120 (0%) | **100/120 (83%)** | 43/120 (36%) | 69/120 (58%) |
+| **False positives** (findings) | 0 | **0** | 26 | **0** |
+| **Finding recall** | 0.00 | 0.75 | **0.90** | 0.76 |
+| **Evidence accuracy** | undefined | **1.00** | 0.00 (quotes verbatim, offsets all wrong) | 0.28 |
+| **Safety violations** | **0** | **0** | 96 (mostly S3 offsets) | 46 (38 are S3 invented offsets) |
+| **Contradictory docs resolved** | 20/20 (guessed) | 0/20 (missed) | **20/20** | 1/20 (answers COMPLIANT) |
+| **Model calls / tokens** (140 cases) | 0 | 0 | 140 / 152k | 1,609 / 2.33M |
+
+> [!IMPORTANT]
+> **Key Insight for Post 1:** REF-1 (a simple regex checker with no LLM) outperforms the LLM agent on full case pass (100 vs 69) and safety (0 vs 46 violations). The LLM agent quotes verbatim from the correct section, but frequently hallucinates character offsets (Safety Check S3).
+>
+> **REF-2 vs the agent:** one model call with the whole document gets the status right more often (109 vs 101) and catches every contradiction (20/20 vs 1/20) at about 1/15 of the tokens. The agent's tools buy precision (0 vs 26 false positives) and better evidence: without tools, REF-2 cannot report correct offsets. REF-2 also often wrote section IDs as `"4.1 Payment Terms"` instead of `"4.1"`; its pre-registered prompt did not specify the format, so the score stands. One trial per case on a synthetic, balanced set: an 8-case gap is suggestive, not established.
+
+---
+
+## ⚡ Guiding Rules & Principles
+
+1. **Design before results (spec §2):** Never change an evaluation definition or prompt to fix a bad score. Every modification must be logged in [`docs/decisions/decisions.md`](docs/decisions/decisions.md).
+2. **Immutable results & append-only records:** Trial rows in `results/raw/` are append-only; the last row per `(case_id, trial_id)` wins.
+3. **Model pinning (spec §6.4):** No `-latest` or `-preview` aliases. The exact version reported by the provider is recorded per trial.
+4. **Reproducibility & thinking tokens:** Gemini 3.x enforces a minimum thinking floor (`thinking_level: MINIMAL`). Reasoning tokens are charged, never returned in text, and logged explicitly in traces.
+5. **Signed-off dataset integrity:** Dataset sign-off binds the SHA-256 of `ground_truth.jsonl`. Regenerating the dataset invalidates the sign-off.
+
+---
+
+## 🛠️ Developer Quickstart & Setup
+
+### Environment Setup
+
+Pinned to Python 3.11 via `.python-version` and managed with `uv`:
 
 ```bash
 uv sync
-uv run pytest
+uv run pytest -q    # runs all unit tests with mock clients (200 passed, no API key required)
 ```
 
-`uv sync` installs the project in editable mode, so every command below runs from the repository
-root with no `PYTHONPATH` prefix. `requirements.txt` is kept in step with `pyproject.toml` for
-anyone without uv (`pip install -e .` then `pip install pytest`).
+### Running Experiments
 
-Inference uses the Google AI Studio free tier (spec §6.3). Set the API key in the environment; it
-is never stored in the repository or in a result row:
+Set your Google AI Studio API key in the shell:
 
 ```bash
 export GOOGLE_API_KEY=...
 ```
 
-A model is required only from step 8 of Milestone 1 onward (the agent loop). Steps 0–7 — schemas,
-tools, dataset generation, dataset validation, deterministic evaluators, and the two no-LLM
-reference baselines — need no key and no network. That ordering is deliberate: the evaluators are
-proven against cases whose answers are already known, before the agent exists.
-
-## Status
-
-Milestone 1 baseline sweep complete. Dataset `v1`, signed off 2026-10-02, hash verified.
-
-| Step | State |
-|---|---|
-| 0-7 scaffold, schemas, policy, tools, generator, validation, evaluators, REF-0/REF-1 | done |
-| 8 agent loop | done: run live on `gemini-3.5-flash-lite`, 140-case sample (20 per category, 1 trial each) |
-
-Results: `results/processed/baseline_v1-20261002T092914Z.md`. Raw rows are in
-`results/raw/baseline_v1-20261002T092914Z/trials.jsonl` and per-trial traces in
-`results/traces/`; both are committed so every reported number can be checked. Reference baselines
-on the 14-case set: `results/processed/references-v1-m1.md`. The sign-off is bound to the sha256
-of `ground_truth.jsonl`, so regenerating the dataset invalidates it.
-
-Next: see `docs/next-steps.md`.
-
+#### 1. Validate configuration and sign-off without calling the model:
 ```bash
-export GOOGLE_API_KEY=...
-uv run python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml --dry-run
+uv run python -m experiments.run_baseline \
+  --config experiments/configs/baseline_v1.yaml \
+  --resume baseline_v1-20261002T092914Z \
+  --dry-run
 ```
 
-The loop itself is tested with `ScriptedClient`, so the whole suite runs with no key and no network.
-That is deliberate: a malformed reply, an unauthorized tool call, a step-limit overrun and a quota
-rejection are not reproducible on demand against a real model, so testing them against one would
-mean not testing them at all.
+#### 2. Run the deterministic reference baselines (REF-0 and REF-1):
+```bash
+uv run python -m experiments.run_references \
+  --dataset v1 \
+  --cases-per-category 20 \
+  --sample-seed 7 \
+  --prefer-run baseline_v1-20261002T092914Z
+```
 
-See spec §29 for the milestone sequence.
+#### 3. Run repeatability trials (28-case stratified subset, 3 trials each):
+```bash
+uv run python -m experiments.run_baseline \
+  --config experiments/configs/baseline_v1.yaml \
+  --resume baseline_v1-20261002T092914Z \
+  --repeat-per-category 4 \
+  --repeat-trials 3
+```
 
-Provider note: the experiment originally specified local inference via Ollama. It moved to a hosted
-free tier before any LLM trial was run; `docs/decisions.md` records the change and spec §6.3 states
-what it costs, most importantly that a hosted model alias can be re-pointed at new weights, so every
-trial records the `model_version` the API reports back.
+---
+
+## 🗺️ Project Roadmap & Next Steps
+
+- [x] **Step 1:** Run REF-0 and REF-1 on the 140-case sample to establish like-for-like baselines.
+- [x] **Step 2:** Repeatability trials — 28-case stratified subset, trials 2 & 3: status agreed on 27/28 cases.
+- [x] **Step 3:** Milestone 1 formal one-page report (spec §29): [docs/reports/milestone-1-report.md](docs/reports/milestone-1-report.md).
+- [x] **Step 4:** REF-2 single-shot baseline on the 140-case sample (pre-registered in decisions.md, 2026-10-17): run `ref2_single_shot-20261017T150310Z`.
+- [ ] **Step 5:** Experiment A — Prompt `p2` to eliminate wasted first lookup and resolve offset hallucination (S3). Pre-register in decisions.md first.
+- [ ] **Step 6:** Experiment C — Cross-family comparator (`gemma-4-31b-it`).
+- [ ] **Step 7:** Judge study (LLM judge vs deterministic evaluator vs human audit; spec §18–20), with two human reviewers or the limitation published.
+- [ ] **Step 8:** Automated CI evaluation tiers (spec §22).
+- [ ] **Step 9:** Statistics and findings table (spec §24).
+
+---
+
+## 📁 Repository Layout
+
+```
+agent/          Agent loop, prompt templates (p1), JSON tools (t1), schemas
+analysis/       Scripts for evidence digest and clustered bootstrap aggregation
+baselines/      Reference baselines: REF-0 (majority class), REF-1 (regex rules), REF-2 (single shot)
+dataset/        Synthetic case generator, policies (POL-001), ground truth
+docs/           Authoritative spec, decision log, walkthrough, and archives
+evaluation/     Deterministic, evidence, safety (S1-S8), trajectory evaluators
+experiments/    Runner scripts (run_baseline, run_references), sampling, configs
+results/        Committed raw trials.jsonl, execution traces, and processed reports
+tests/          Complete test suite verifying evaluators, schemas, and runners
+```

@@ -5,6 +5,8 @@ Usage:
     python -m experiments.run_baseline --config experiments/configs/baseline_v1.yaml
     python -m experiments.run_baseline --config ... --limit 2   # smoke test, 2 cases
     python -m experiments.run_baseline --config ... --resume <run_id>   # continue after a quota stop
+    python -m experiments.run_baseline --config ... --resume <run_id> \
+        --repeat-per-category 4 --repeat-trials 3  # repeatability subset (spec §17)
 
 Three behaviours here are measurement decisions:
 
@@ -26,6 +28,7 @@ import argparse
 import platform
 import sys
 import time
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -49,6 +52,37 @@ from analysis.scripts.aggregate import summarize
 from evaluation.deterministic.evaluate import evaluate_case, no_answer_row, to_row
 from experiments.sampling import select_cases
 from experiments.signoff import signoff_status
+
+
+def consistency_section(rows: list[TrialRow]) -> list[str]:
+    """Trial consistency for the repeated cases: per-trial accuracy, and every case that disagreed."""
+    by_case: dict[str, list[TrialRow]] = defaultdict(list)
+    for row in rows:
+        by_case[row.case_id].append(row)
+    repeated = {c: sorted(rs, key=lambda r: r.trial_id) for c, rs in by_case.items() if len(rs) > 1}
+    if not repeated:
+        return []
+    trials = sorted({r.trial_id for rs in repeated.values() for r in rs})
+    lines = [
+        "",
+        "## Trial consistency (spec section 17)",
+        "",
+        f"{len(repeated)} cases ran {len(trials)} trials each.",
+        "",
+        "| trial | status correct | full pass |",
+        "|---|---|---|",
+    ]
+    for t in trials:
+        subset = [r for rs in repeated.values() for r in rs if r.trial_id == t]
+        correct = sum(r.status_correct for r in subset)
+        passed = sum(r.deterministic_result == "pass" for r in subset)
+        lines.append(f"| {t} | {correct}/{len(subset)} | {passed}/{len(subset)} |")
+    disagree = {c: rs for c, rs in repeated.items() if len({r.actual_status for r in rs}) > 1}
+    lines += ["", f"Status disagreed across trials on {len(disagree)} of {len(repeated)} cases."]
+    for case_id, rs in sorted(disagree.items()):
+        statuses = ", ".join(f"t{r.trial_id} {r.actual_status}" for r in rs)
+        lines.append(f"- {case_id} ({rs[0].case_category}): {statuses}")
+    return lines
 
 
 def latest_rows(rows: list[TrialRow]) -> list[TrialRow]:
@@ -128,6 +162,26 @@ def main() -> None:
         action="store_true",
         help="skip the single request that checks the model is callable",
     )
+    parser.add_argument(
+        "--repeat-per-category",
+        type=int,
+        default=None,
+        metavar="N",
+        help=(
+            "Run repeated trials for N cases per category (for trial consistency, spec §17). "
+            "Overrides config run.repeat_per_category."
+        ),
+    )
+    parser.add_argument(
+        "--repeat-trials",
+        type=int,
+        default=None,
+        metavar="T",
+        help=(
+            "Target number of trials for repeat cases (default: 3). "
+            "Overrides config run.repeat_trials."
+        ),
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -137,6 +191,17 @@ def main() -> None:
     all_cases = load_ground_truth(dataset_version)
     policy = load_policy(all_cases[0].policy_id)
     trials_per_case = int(config["run"]["trials_per_case"])
+
+    repeat_per_category = args.repeat_per_category
+    if repeat_per_category is None:
+        repeat_per_category = config.get("run", {}).get("repeat_per_category")
+    if repeat_per_category is not None:
+        repeat_per_category = int(repeat_per_category)
+
+    repeat_trials = args.repeat_trials
+    if repeat_trials is None:
+        repeat_trials = config.get("run", {}).get("repeat_trials", 3)
+    repeat_trials = int(repeat_trials)
 
     prior: list[TrialRow] = []
     if args.resume:
@@ -159,10 +224,33 @@ def main() -> None:
     selected_ids = {c.case_id for c in cases}
     if args.limit:
         cases = cases[: args.limit]
+
+    repeat_ids: set[str] = set()
+    if repeat_per_category:
+        repeat_cases = select_cases(
+            all_cases,
+            per_category=repeat_per_category,
+            seed=int(dataset_cfg.get("sample_seed", 7)),
+            prefer={r.case_id for r in measured},
+        )
+        repeat_ids = {c.case_id for c in repeat_cases}
+
+    case_target_trials: dict[str, int] = {
+        c.case_id: (
+            repeat_trials
+            if (repeat_per_category and c.case_id in repeat_ids)
+            else trials_per_case
+        )
+        for c in cases
+    }
+
     todo = [
         c
         for c in cases
-        if any((c.case_id, t) not in done for t in range(1, trials_per_case + 1))
+        if any(
+            (c.case_id, t) not in done
+            for t in range(1, case_target_trials[c.case_id] + 1)
+        )
     ]
 
     ready, reason = signoff_status(dataset_version)
@@ -183,52 +271,69 @@ def main() -> None:
                 "seed": run_config.seed,
             },
         )
-    print(
-        f"{experiment_id}: {len(cases)} cases x {trials_per_case} trial(s) "
-        f"on {run_config.model_name}; {len(measured)} trials already measured, "
-        f"{len(todo)} cases to run"
-    )
+    if repeat_per_category:
+        print(
+            f"{experiment_id}: {len(cases)} cases ({len(repeat_ids)} x {repeat_trials} trials, "
+            f"{len(cases) - len(repeat_ids)} x {trials_per_case} trial) on {run_config.model_name}; "
+            f"{len(measured)} trials already measured, {len(todo)} cases to run"
+        )
+    else:
+        print(
+            f"{experiment_id}: {len(cases)} cases x {trials_per_case} trial(s) "
+            f"on {run_config.model_name}; {len(measured)} trials already measured, "
+            f"{len(todo)} cases to run"
+        )
     if args.dry_run:
         print("dry run: config, dataset and sign-off check complete. No model was called.")
         return
 
-    quota = config.get("quota", {})
-    client = GeminiClient(
-        run_config.model_name,
-        temperature=run_config.temperature,
-        top_p=run_config.top_p,
-        top_k=run_config.top_k,
-        seed=run_config.seed,
-        max_output_tokens=run_config.max_output_tokens,
-        thinking_level=run_config.thinking_level or None,
-        quota=QuotaPolicy(
-            max_retries=quota.get("max_retries", 5),
-            initial_backoff_seconds=quota.get("initial_backoff_seconds", 2.0),
-            backoff_multiplier=quota.get("backoff_multiplier", 2.0),
-            max_backoff_seconds=quota.get("max_backoff_seconds", 60.0),
-        ),
-    )
-    run_config.runtime_version = client.runtime_version
-
-    if not args.no_preflight:
-        # One request, to establish that the configured model is callable by this key. A model can
-        # be listed by the API and still be closed to new keys, and finding that out trial by trial
-        # costs one void row per case. The request also captures the provider-reported model
-        # version before any trial runs.
-        try:
-            probe = client.generate("Reply with the single word: ok", "ok")
-        except HarnessError as exc:
-            if exc.code == "MODEL_UNAVAILABLE":
-                raise SystemExit(
-                    f"Model {run_config.model_name!r} is not callable by this key:\n  {exc.message}\n"
-                    "Nothing was run. Update `model.name` in the config, then try again."
-                ) from exc
-            raise SystemExit(f"Preflight failed: {exc}") from exc
-        run_config.model_version = probe.model_version or run_config.model_version
-        print(
-            f"preflight ok: model reports version "
-            f"{run_config.model_version or 'nothing'}"
+    client = None
+    if todo:
+        quota = config.get("quota", {})
+        client = GeminiClient(
+            run_config.model_name,
+            temperature=run_config.temperature,
+            top_p=run_config.top_p,
+            top_k=run_config.top_k,
+            seed=run_config.seed,
+            max_output_tokens=run_config.max_output_tokens,
+            thinking_level=run_config.thinking_level or None,
+            quota=QuotaPolicy(
+                max_retries=quota.get("max_retries", 5),
+                initial_backoff_seconds=quota.get("initial_backoff_seconds", 2.0),
+                backoff_multiplier=quota.get("backoff_multiplier", 2.0),
+                max_backoff_seconds=quota.get("max_backoff_seconds", 60.0),
+            ),
         )
+        run_config.runtime_version = client.runtime_version
+
+        if not args.no_preflight:
+            # One request, to establish that the configured model is callable by this key. A model can
+            # be listed by the API and still be closed to new keys, and finding that out trial by trial
+            # costs one void row per case. The request also captures the provider-reported model
+            # version before any trial runs.
+            try:
+                probe = client.generate("Reply with the single word: ok", "ok")
+            except HarnessError as exc:
+                if exc.code == "MODEL_UNAVAILABLE":
+                    raise SystemExit(
+                        f"Model {run_config.model_name!r} is not callable by this key:\n  {exc.message}\n"
+                        "Nothing was run. Update `model.name` in the config, then try again."
+                    ) from exc
+                raise SystemExit(f"Preflight failed: {exc}") from exc
+            run_config.model_version = probe.model_version or run_config.model_version
+            print(
+                f"preflight ok: model reports version "
+                f"{run_config.model_version or 'nothing'}"
+            )
+    else:
+        # Nothing left to run, so no client and no key: the report is rebuilt from the rows on
+        # disk. The model version is the one those rows recorded.
+        run_config.model_version = next(
+            (r.model_version for r in reversed(measured) if r.model_version),
+            run_config.model_version,
+        )
+        print("nothing to run: rebuilding the report from existing rows, no model is called")
 
     run_id = args.resume or (
         f"{experiment_id}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
@@ -241,11 +346,14 @@ def main() -> None:
     wall_clock: list[float] = []
     attempted = 0
     stopped_early = ""
+    planned = sum(case_target_trials.get(cid, trials_per_case) for cid in selected_ids)
+
     for case in todo:
         if stopped_early:
             break
         document = load_document(case)
-        for trial_id in range(1, trials_per_case + 1):
+        target_trials = case_target_trials.get(case.case_id, trials_per_case)
+        for trial_id in range(1, target_trials + 1):
             if (case.case_id, trial_id) in done:
                 continue
             agent = Agent(client, max_steps=run_config.max_steps)
@@ -318,9 +426,10 @@ def main() -> None:
                 # The daily budget is spent. Continuing would collect one identical rejection per
                 # remaining case, which costs time and tells us nothing. Stop, keep what was
                 # measured, and say so in the report.
+                remaining = planned - len(measured)
                 stopped_early = (
                     f"the daily free-tier quota was exhausted after {attempted} of "
-                    f"{len(todo) * trials_per_case} planned trials"
+                    f"{remaining} planned trials"
                 )
                 print(f"  stopping: {stopped_early}")
                 break
@@ -333,7 +442,6 @@ def main() -> None:
     voided = [r for r in rows if r.harness_error]
     scored = [r for r in rows if not r.harness_error]
     llm_calls = [r.num_llm_calls for r in rows if r.num_llm_calls]
-    planned = len(selected_ids) * trials_per_case
     if len(scored) < planned and not stopped_early:
         stopped_early = f"only {len(scored)} of {planned} planned trials have a measured row"
 
@@ -343,6 +451,14 @@ def main() -> None:
     else:
         report += [
             f"> **Not a reportable result.** {reason}. Spec sections 9.3 and 28.",
+            "",
+        ]
+    if repeat_per_category:
+        report += [
+            f"> **Repeatability subset:** {len(repeat_ids)} cases "
+            f"({repeat_per_category} per category) evaluated for {repeat_trials} "
+            f"trials to measure trial consistency; remaining cases evaluated for "
+            f"{trials_per_case} trial (spec §17, docs/decisions/decisions.md, 2026-10-15).",
             "",
         ]
     report += [
@@ -367,7 +483,23 @@ def main() -> None:
             "excluded from every metric below (spec section 6.3). They are not agent errors.",
             "",
         ]
-    report.append(summarize(scored, f"{experiment_id} — {run_config.model_name}"))
+    # When only a subset of cases is repeated, pooling every trial would weight those cases three
+    # times. The headline is then trial 1 for every case, and trial consistency is taken from all
+    # trials (docs/decisions/decisions.md, 2026-10-17).
+    trials_by_case = Counter(r.case_id for r in scored)
+    uneven = len(set(trials_by_case.values())) > 1
+    headline = [r for r in scored if r.trial_id == 1] if uneven else scored
+    if uneven:
+        report += [
+            "Headline numbers below are trial 1 of every case. Trials 2 and 3 of the repeatability "
+            "subset are used only for trial consistency.",
+            "",
+        ]
+    report.append(
+        summarize(headline, f"{experiment_id} — {run_config.model_name}", consistency_rows=scored)
+    )
+    if uneven:
+        report += consistency_section(scored)
 
     if wall_clock:
         total = sum(wall_clock)
@@ -401,8 +533,8 @@ def main() -> None:
                 "This is the binding constraint on a free tier, not wall clock. A per-day request "
                 "cap divided by requests per trial gives the real daily throughput, and the full "
                 "matrix must be sized against that number (spec section 7).",
-        ]
-        print(f"mean {mean:.1f}s per trial, total {total / 60:.1f} min")
+            ]
+            print(f"mean {mean:.1f}s per trial, total {total / 60:.1f} min")
 
     processed = REPO_ROOT / "results" / "processed" / f"{run_id}.md"
     processed.parent.mkdir(parents=True, exist_ok=True)
