@@ -36,6 +36,7 @@ import yaml
 
 from agent.agent import Agent
 from agent.llm.client import GeminiClient, HarnessError, QuotaPolicy
+from agent.prompts import get_prompt
 from agent.prompts.p1 import PROMPT_VERSION
 from agent.schemas.loaders import (
     REPO_ROOT,
@@ -104,6 +105,13 @@ def check_resume_identity(rows: list[TrialRow], expected: dict) -> None:
                     f"Refusing to resume: {row.case_id} was run with {field}={got!r} but this "
                     f"config has {want!r}. A resumed run must be one experiment."
                 )
+
+
+def measured_case_ids(run_id: str) -> set[str]:
+    path = REPO_ROOT / "results" / "raw" / run_id / "trials.jsonl"
+    if not path.exists():
+        raise SystemExit(f"Cannot use prefer_run {run_id!r}: {path} does not exist.")
+    return {r.case_id for r in read_jsonl(path, TrialRow) if not r.harness_error}
 
 
 def load_config(path: Path) -> dict:
@@ -213,13 +221,19 @@ def main() -> None:
     done = {(r.case_id, r.trial_id) for r in measured}
 
     dataset_cfg = config["dataset"]
+    prefer = {r.case_id for r in measured}
+    # `dataset.prefer_run` pins the sample to the cases another run measured, so an experiment arm
+    # is compared on exactly the baseline's cases (Experiment A, docs/decisions/decisions.md
+    # 2026-10-18). Without it a fresh run draws 139 of the baseline's 140.
+    if dataset_cfg.get("prefer_run"):
+        prefer |= measured_case_ids(dataset_cfg["prefer_run"])
     # The sample is fixed by the config, not by what has run: `prefer` only reuses cases already
     # measured and cannot change which cases belong to it.
     cases = select_cases(
         all_cases,
         dataset_cfg.get("cases_per_category"),
         int(dataset_cfg.get("sample_seed", 7)),
-        prefer={r.case_id for r in measured},
+        prefer=prefer,
     )
     selected_ids = {c.case_id for c in cases}
     if args.limit:
@@ -231,7 +245,7 @@ def main() -> None:
             all_cases,
             per_category=repeat_per_category,
             seed=int(dataset_cfg.get("sample_seed", 7)),
-            prefer={r.case_id for r in measured},
+            prefer=prefer,
         )
         repeat_ids = {c.case_id for c in repeat_cases}
 
@@ -257,6 +271,10 @@ def main() -> None:
     print(f"dataset sign-off: {'verified' if ready else 'MISSING'} — {reason}")
 
     run_config = build_run_config(config, dataset_version, policy.policy_version)
+    try:
+        get_prompt(run_config.prompt_version)  # fail before any request, not on the first trial
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
     if args.resume:
         check_resume_identity(
             prior,

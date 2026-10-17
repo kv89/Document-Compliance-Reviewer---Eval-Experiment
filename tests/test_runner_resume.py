@@ -146,6 +146,43 @@ def test_repeat_subset_runs_extra_trials_for_subset_and_measures_consistency(tmp
     assert "trial consistency: 7/7 cases where all trials agreed on status" in report
 
 
+def test_prefer_run_pins_the_sample_to_another_runs_cases(tmp_path, monkeypatch):
+    """An experiment arm runs on exactly the baseline's cases (decisions.md, 2026-10-18)."""
+    monkeypatch.setattr(rb, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(rb, "GeminiClient", _fake_client([100]))
+
+    def sweep(name: str, **dataset) -> str:
+        base = yaml.safe_load(open("experiments/configs/baseline_v1.yaml", encoding="utf-8"))
+        base["experiment_id"] = name
+        base["dataset"].update(version="v1-m1", cases_per_category=1, **dataset)
+        config = tmp_path / f"{name}.yaml"
+        config.write_text(yaml.safe_dump(base), encoding="utf-8")
+        monkeypatch.setattr(sys, "argv", ["run_baseline", "--config", str(config), "--no-preflight"])
+        rb.main()
+        return next(p.name for p in (tmp_path / "results" / "raw").iterdir() if p.name.startswith(name))
+
+    reference = sweep("reference", sample_seed=8)  # seed 8 picks different cases than seed 7
+    pinned = sweep("pinned", sample_seed=7, prefer_run=reference)
+    unpinned = sweep("unpinned", sample_seed=7)
+
+    def ids(run_id):
+        return {r.case_id for r in _rows(tmp_path, run_id)}
+
+    assert ids(pinned) == ids(reference)
+    assert ids(unpinned) != ids(reference)
+
+
+def test_unknown_prompt_version_stops_before_any_request(sweep, tmp_path):
+    run, root = sweep
+    config = root / "cfg.yaml"
+    data = yaml.safe_load(config.read_text(encoding="utf-8"))
+    data["prompt_version"] = "p9"
+    config.write_text(yaml.safe_dump(data), encoding="utf-8")
+    with pytest.raises(SystemExit, match="Unknown prompt_version 'p9'"):
+        run(100)
+    assert not (root / "results").exists()
+
+
 # ---------------------------------------------------------------------------
 # REF-2 runner (experiments/run_references.py, docs/decisions/decisions.md 2026-10-17)
 # ---------------------------------------------------------------------------

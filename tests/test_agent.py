@@ -8,12 +8,14 @@ one would mean not testing them at all.
 
 from __future__ import annotations
 
+import hashlib
 import json
 
 import pytest
 
 from agent.agent import Agent, extract_json
 from agent.llm.client import HarnessError, LLMResponse, QuotaPolicy, ScriptedClient
+from agent.prompts import p1, p2
 from agent.prompts.p1 import SYSTEM_PROMPT
 from agent.schemas.models import ComplianceStatus, FindingType, Severity
 from agent.schemas.trace import (
@@ -123,6 +125,37 @@ def test_tool_results_attribute_sections_and_rules_separately(document, policy):
 def test_the_system_prompt_is_sent_unmodified(document, policy):
     _, client = _run([_final("COMPLIANT")], document, policy)
     assert client.calls[0][0] == SYSTEM_PROMPT
+
+
+def test_p1_text_is_frozen():
+    """p1 is the measured baseline. Adding p2 must not change a character of it."""
+    text = p1.SYSTEM_PROMPT + p1.USER_PROMPT + p1.TOOL_RESULT_PROMPT
+    assert hashlib.sha256(text.encode()).hexdigest() == (
+        "82abe6e458e45639b146255790112dc327189b5bee2774105b4d85ece99425ff"
+    )
+
+
+def test_p2_sends_its_own_prompt_and_lists_rule_ids(document, policy):
+    result, client = _run(
+        ['{"tool": "list_document_sections", "arguments": {}}', _final("COMPLIANT")],
+        document,
+        policy,
+        prompt_version="p2",
+    )
+    system, first = client.calls[0]
+    assert system == p2.SYSTEM_PROMPT
+    for rule in policy.rules:
+        assert f"{rule.rule_id} ({rule.clause})" in first
+    assert "The policy id is not a rule id." in first
+    # Only ids are given: rule statements still have to be looked up (safety checks S1, S8).
+    assert not any(rule.statement in first for rule in policy.rules)
+    assert "Result of list_document_sections" in client.calls[1][1]
+    assert result.trace.config.prompt_version == "p2"
+
+
+def test_unknown_prompt_version_is_refused(document, policy):
+    with pytest.raises(ValueError, match="Unknown prompt_version"):
+        _run([_final("COMPLIANT")], document, policy, prompt_version="p9")
 
 
 # ---------------------------------------------------------------- repair budget
@@ -309,7 +342,8 @@ def test_traces_serialise_and_reload(document, policy, tmp_path):
 
 
 # ---------------------------------------------------------------- contract documentation
-def test_the_prompt_documents_every_enum_value_the_schema_accepts():
+@pytest.mark.parametrize("prompt", [p1, p2], ids=["p1", "p2"])
+def test_the_prompt_documents_every_enum_value_the_schema_accepts(prompt):
     """A value the schema accepts but the prompt never mentions is unreachable by construction.
 
     If the prompt and the schema drift apart, the agent is scored against a contract it was never
@@ -317,14 +351,15 @@ def test_the_prompt_documents_every_enum_value_the_schema_accepts():
     """
     for enum in (ComplianceStatus, FindingType, Severity):
         for member in enum:
-            assert member.value in SYSTEM_PROMPT, f"{enum.__name__}.{member.value} not in prompt"
+            assert member.value in prompt.SYSTEM_PROMPT, f"{enum.__name__}.{member.value} not in prompt"
 
 
-def test_the_prompt_lists_exactly_the_authorized_tools(document, policy):
+@pytest.mark.parametrize("prompt", [p1, p2], ids=["p1", "p2"])
+def test_the_prompt_lists_exactly_the_authorized_tools(prompt, document, policy):
     from agent.tools.toolset import ToolSet
 
     for tool in ToolSet(document, policy).authorized_tools:
-        assert tool in SYSTEM_PROMPT
+        assert tool in prompt.SYSTEM_PROMPT
 
 
 # ---------------------------------------------------------------- client retry policy

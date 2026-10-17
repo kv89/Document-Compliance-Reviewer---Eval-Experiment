@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from agent.llm.client import HarnessError, LLMClient
-from agent.prompts import p1
+from agent.prompts import get_prompt, initial_prompt
 from agent.schemas.models import AgentOutput, Policy
 from agent.schemas.trace import (
     EventType,
@@ -154,6 +154,7 @@ class Agent:
         trial_id: int = 1,
         run_id: str = "",
     ) -> AgentResult:
+        prompts = get_prompt(config.prompt_version)
         tools = ToolSet(document, policy)
         trace = Trace(
             experiment_id=experiment_id,
@@ -169,7 +170,7 @@ class Agent:
             },
         )
 
-        transcript = p1.initial_prompt(policy.policy_id, policy.policy_version)
+        transcript = initial_prompt(config.prompt_version, policy)
         seq = 0
         repaired = False
         pending_problem: str | None = None
@@ -179,7 +180,7 @@ class Agent:
                 transcript + "\n\n" + _REPAIR_PROMPT.format(problem=pending_problem)
             )
             try:
-                response = self._client.generate(p1.SYSTEM_PROMPT, prompt)
+                response = self._client.generate(prompts.SYSTEM_PROMPT, prompt)
             except HarnessError as exc:
                 # Infrastructure failure. The trial is void, not wrong.
                 trace.terminated_reason = TerminatedReason.ERROR
@@ -239,7 +240,9 @@ class Agent:
 
             if "tool" in message:
                 pending_problem = None
-                transcript = self._dispatch(trace, tools, message, transcript)
+                transcript = self._dispatch(
+                    trace, tools, message, transcript, prompts.TOOL_RESULT_PROMPT
+                )
                 seq = trace.events[-1].seq
                 continue
 
@@ -279,6 +282,7 @@ class Agent:
         tools: ToolSet,
         message: dict,
         transcript: str,
+        tool_result_prompt: str,
     ) -> str:
         name = message.get("tool")
         arguments = message.get("arguments") or {}
@@ -308,7 +312,7 @@ class Agent:
         )
 
         rendered = _clip(json.dumps(result, indent=2, sort_keys=True), self._max_result_chars)
-        return transcript + "\n\n" + p1.TOOL_RESULT_PROMPT.format(
+        return transcript + "\n\n" + tool_result_prompt.format(
             tool=name, arguments=json.dumps(arguments, sort_keys=True), result=rendered
         )
 
