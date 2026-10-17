@@ -1,6 +1,6 @@
 # Reference baselines — dataset `v1-m1`
 
-> Dataset sign-off verified: signed off by Vishal Kalaskar (vishal.kalaskar@searce.com).
+> Dataset sign-off verified: signed off by Vishal Kalaskar (mail.vishaldk@gmail.com).
 
 Both baselines are deterministic and use no model. They exist to give the agent's numbers something to be measured against (spec section 15.1).
 

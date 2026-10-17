@@ -9,8 +9,8 @@ venv/
 .deepeval_telemetry.txt
 
 # Raw trial rows and traces ARE committed. They are small, and a hosted model cannot be re-run to
-# the same output, so they are the only evidence of what each trial did (docs/decisions.md,
-# 2026-10-12). Processed reports are committed too (docs/implementation-spec-v2.md s23).
+# the same output, so they are the only evidence of what each trial did (docs/decisions/decisions.md,
+# 2026-10-12). Processed reports are committed too (docs/specs/implementation-spec-v2.md s23).
 
 # Never commit an API key. The key is read from the environment (spec section 6.3); these patterns
 # exist so that a local convenience file can never be committed by accident.

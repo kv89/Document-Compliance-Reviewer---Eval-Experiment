@@ -50,7 +50,7 @@ document: raw text, 1454 characters
 Printed to console:
 
 ```
-dataset sign-off: verified — signed off by Vishal Kalaskar (vishal.kalaskar@searce.com)
+dataset sign-off: verified — signed off by Vishal Kalaskar (mail.vishaldk@gmail.com)
 ```
 
 ### 4. `build_run_config()`
@@ -147,7 +147,7 @@ Written to `results/processed/baseline_v1-20261001T184634Z.md`:
 
 ```
 # baseline_v1 — dataset `v1-m1`
-> Dataset sign-off verified: signed off by Vishal Kalaskar (vishal.kalaskar@searce.com).
+> Dataset sign-off verified: signed off by Vishal Kalaskar (mail.vishaldk@gmail.com).
 Model `gemini-3.5-flash-lite`, reported version `gemini-3.5-flash-lite`, temperature 0.0,
 seed 7, thinking level `MINIMAL`, prompt `p1`, tools `t1`.
 ```
