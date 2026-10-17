@@ -280,9 +280,22 @@ class GeminiClient:
         raise HarnessError("QUOTA_EXHAUSTED", last_error or "retries exhausted")
 
 
-def _is_retryable(error_text: str) -> bool:
+def _has_marker(error_text: str, markers: tuple[str, ...]) -> bool:
+    """Match markers in upper-cased error text; a numeric status code only as a whole number.
+
+    Plain substring matching once read the `403` inside a retry hint of "26.964036119s" as
+    PERMISSION_DENIED, and stopped a REF-2 run on an ordinary per-minute 429 (decisions.md,
+    2026-10-17).
+    """
     upper = error_text.upper()
-    return any(marker in upper for marker in RETRYABLE_MARKERS)
+    return any(
+        re.search(rf"(?<![\d.]){m}(?!\.?\d)", upper) if m.isdigit() else m in upper
+        for m in markers
+    )
+
+
+def _is_retryable(error_text: str) -> bool:
+    return _has_marker(error_text, RETRYABLE_MARKERS)
 
 
 def _is_unavailable(error_text: str) -> bool:
@@ -292,8 +305,7 @@ def _is_unavailable(error_text: str) -> bool:
     hit exactly that: a 404 saying the model "is no longer available to new users". Retrying or
     continuing the sweep would produce one void trial per case.
     """
-    upper = error_text.upper()
-    return any(marker in upper for marker in UNAVAILABLE_MARKERS)
+    return _has_marker(error_text, UNAVAILABLE_MARKERS)
 
 
 def _is_daily_quota(error_text: str) -> bool:

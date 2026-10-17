@@ -561,6 +561,25 @@ def test_quota_and_availability_failures_are_not_confused(monkeypatch):
     assert _is_daily_quota(_DAILY_429) and not _is_unavailable(_DAILY_429)
 
 
+#: Live REF-2 stop, 2026-10-17: a per-minute 429 whose retry hint "26.964036119s" contains "403".
+_PER_MINUTE_429 = (
+    "ClientError: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your "
+    "current quota. Please retry in 26.964036119s.', 'status': 'RESOURCE_EXHAUSTED', 'details': "
+    "[{'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaValue': '15'}, "
+    "{'retryDelay': '26s'}]}}"
+)
+
+
+def test_status_codes_match_only_as_whole_numbers():
+    from agent.llm.client import _is_daily_quota, _is_retryable, _is_unavailable
+
+    assert not _is_unavailable(_PER_MINUTE_429)  # the "403" inside 26.964036119 is not a 403
+    assert _is_retryable(_PER_MINUTE_429) and not _is_daily_quota(_PER_MINUTE_429)
+    assert _is_unavailable("ClientError: 403 PERMISSION_DENIED")
+    assert _is_unavailable("got HTTP 404.")
+    assert not _is_retryable("bad request: field 1500 too long")
+
+
 # ---------------------------------------------------------------- hidden reasoning cost
 def test_thinking_tokens_are_recorded_and_counted_in_the_total(monkeypatch, document, policy):
     """Internal reasoning is charged, never returned, and cannot be switched off on Gemini 3.x.
