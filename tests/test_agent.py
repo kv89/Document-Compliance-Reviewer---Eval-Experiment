@@ -464,8 +464,8 @@ def test_an_empty_response_is_retried_then_raised_as_empty_not_provider_error(mo
     Observed live: Gemini 3 returned empty text with finish_reason MALFORMED_FUNCTION_CALL on
     three of eight requests in the first run, because it tried to call a function although none
     were declared. That is a provider outcome, not a reply, so it must not be parsed as one or
-    charged to the agent as malformed output. It is also not deterministic, so it is retried like
-    any other transient failure before the trial is written off.
+    charged to the agent as malformed output. It is retried once, not on the quota schedule: in
+    run expA_p2-20261017T200247Z it recurred on every attempt at temperature 0.
     """
     gemini, slept = _gemini_with(
         monkeypatch,
@@ -475,7 +475,7 @@ def test_an_empty_response_is_retried_then_raised_as_empty_not_provider_error(mo
         gemini.generate("system", "prompt")
 
     assert caught.value.code == "EMPTY_RESPONSE"
-    assert len(slept) == 3, "three retries allowed before the fourth attempt gives up"
+    assert len(slept) == 1, "one retry, whatever max_retries allows"
 
 
 def test_an_empty_response_that_recovers_is_not_an_error(monkeypatch):

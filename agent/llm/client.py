@@ -41,6 +41,17 @@ import time
 from dataclasses import dataclass, field
 from typing import Protocol
 
+#: Upper bound on one request, in milliseconds. The SDK sets none by default, so a connection the
+#: server never answers blocks the sweep indefinitely; run `expA_p2-20261017T200247Z` sat on one
+#: socket read for over two hours. A timed-out call becomes a PROVIDER_ERROR void and is retried on
+#: resume. Normal calls finish in seconds, so two minutes cuts off nothing real.
+REQUEST_TIMEOUT_MS = 120_000
+
+#: Retries of an empty response before the trial is voided as EMPTY_RESPONSE. Kept apart from the
+#: quota schedule: an empty reply is not a rate limit, and in run `expA_p2-20261017T200247Z` it
+#: recurred on every attempt, so eight backed-off retries only burned time and requests.
+EMPTY_RESPONSE_RETRIES = 1
+
 #: Markers of a quota that resets daily rather than per minute. A per-day quota cannot be waited
 #: out inside a run, so retrying one burns a minute of backoff to arrive at the same rejection. The
 #: first live run did exactly that, twice. These are matched against the quota identifier Google
@@ -176,7 +187,9 @@ class GeminiClient:
             )
 
         self._genai = genai
-        self._client = genai.Client(api_key=key)
+        self._client = genai.Client(
+            api_key=key, http_options=genai.types.HttpOptions(timeout=REQUEST_TIMEOUT_MS)
+        )
         self.model_name = model_name
         #: Filled in from the first response. Empty until then, and never guessed.
         self.model_version = ""
@@ -219,6 +232,7 @@ class GeminiClient:
 
     def generate(self, system: str, prompt: str) -> LLMResponse:
         last_error = ""
+        empty_retries = 0
         for attempt in range(self._quota.max_retries + 1):
             started = time.monotonic()
             try:
@@ -260,12 +274,14 @@ class GeminiClient:
                 # The provider returned no text. Observed live as MALFORMED_FUNCTION_CALL: the model
                 # tried to emit a function call, and because no tools are declared nothing came
                 # back. There is no agent output to judge, so this must not be parsed as an answer
-                # or charged to the agent as a malformed one. It is also not deterministic, so one
-                # more attempt is worth making before the trial is written off.
+                # or charged to the agent as a malformed one. One more attempt is worth making
+                # before the trial is written off, but no more: at temperature 0 it mostly repeats,
+                # and the full quota schedule spent about 8 minutes and 9 requests per occurrence.
                 last_error = f"empty response (finish reason {reason!r})"
-                if attempt == self._quota.max_retries:
+                if empty_retries == EMPTY_RESPONSE_RETRIES or attempt == self._quota.max_retries:
                     raise HarnessError("EMPTY_RESPONSE", last_error)
-                self._sleep(self._quota.delay_for(attempt) * (1.0 + random.random() * 0.1))
+                empty_retries += 1
+                self._sleep(self._quota.delay_for(0) * (1.0 + random.random() * 0.1))
                 continue
             return LLMResponse(
                 text=text,
