@@ -142,13 +142,20 @@ On this synthetic, deliberately balanced set (figures in the [README](../../READ
   false alarms and cannot give correct text positions without tools. So the agent's tools buy
   precision and evidence, not better verdicts.
 - Answers were stable across repeated tries on almost every repeated document.
+- **Experiment A (a more explicit prompt, `p2`) fixed the causes but broke the format.** The
+  wasted first call disappeared and invented positions fell by about half. But the model
+  more often answered in a form the program could not read (34 of 133 documents) or returned
+  nothing (7 documents never produced an answer), so overall status accuracy fell from 95 to 74 of
+  114 clear-cut documents. Where `p2` did answer, it was slightly more often right than `p1`.
+  Contradictions are still mostly missed. Details in
+  [expA-p1-vs-p2.md](../reports/expA-p1-vs-p2.md).
 
 ## What comes next
 
 The ordered list is the "Project Roadmap & Next Steps" section of the [README](../../README.md). In
-short: try one controlled improvement (prompt `p2`, aimed at the
-wrong positions and the wasted call), then test whether an AI judge can grade answers reliably
-against human reviewers, then build automated test tiers and the final statistics.
+short: a follow-up experiment on making the output format reliable (to be pre-registered), then
+a second model family, then testing whether an AI judge can grade answers reliably against human
+reviewers, then automated test tiers and the final statistics.
 
 ## Where to look
 
@@ -158,5 +165,6 @@ against human reviewers, then build automated test tiers and the final statistic
 | every change and why | [decisions/decisions.md](../decisions/decisions.md) |
 | how the code runs, file by file | [code-review-walkthrough.md](code-review-walkthrough.md) |
 | headline results | [README](../../README.md) and [milestone-1-report.md](../reports/milestone-1-report.md) |
-| every number used in the blog | [blog-evidence.md](../reports/blog-evidence.md) |
+| every number used in the blog | [blog-evidence.md](../reports/blog-evidence.md) and [blog-evidence-expA-p2.md](../reports/blog-evidence-expA-p2.md) |
+| the prompt experiment, `p1` vs `p2` | [expA-p1-vs-p2.md](../reports/expA-p1-vs-p2.md) |
 | raw data | `results/raw/` (one row per answer) and `results/traces/` (step-by-step traces) |

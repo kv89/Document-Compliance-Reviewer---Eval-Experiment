@@ -21,6 +21,8 @@ The project follows a strict **pre-registration and specification-first** method
 | [docs/decisions/decisions.md](docs/decisions/decisions.md) | **Append-Only Decision Log.** Every post-v2 methodology, parameter, and runner change with rationale and affected experiments. |
 | [docs/guides/code-review-walkthrough.md](docs/guides/code-review-walkthrough.md) | **Code Walkthrough.** Traces execution flow and function call sequence of a run from entry point to report. |
 | [docs/reports/blog-evidence.md](docs/reports/blog-evidence.md) | **Blog Evidence Digest.** Machine-extracted metrics, safety breakdown, and trace pointers for the blog series. |
+| [docs/reports/blog-evidence-expA-p2.md](docs/reports/blog-evidence-expA-p2.md) | **Experiment A Digest.** The same digest for prompt `p2`. |
+| [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md) | **Experiment A Report.** Paired `p1` vs `p2` comparison with void counts and the sensitivity analysis. |
 | [docs/archive/v1-experiment-design.md](docs/archive/v1-experiment-design.md) | **Historical Archive.** Superseded version 1 experiment design specification. |
 
 ---
@@ -84,6 +86,23 @@ REF-2 is run `ref2_single_shot-20261017T150310Z` (same model and settings as the
 > **Key Insight for Post 1:** REF-1 (a simple regex checker with no LLM) outperforms the LLM agent on full case pass (100 vs 69) and safety (0 vs 46 violations). The LLM agent quotes verbatim from the correct section, but frequently hallucinates character offsets (Safety Check S3).
 >
 > **REF-2 vs the agent:** one model call with the whole document gets the status right more often (109 vs 101) and catches every contradiction (20/20 vs 1/20) at about 1/15 of the tokens. The agent's tools buy precision (0 vs 26 false positives) and better evidence: without tools, REF-2 cannot report correct offsets. REF-2 also often wrote section IDs as `"4.1 Payment Terms"` instead of `"4.1"`; its pre-registered prompt did not specify the format, so the score stands. One trial per case on a synthetic, balanced set: an 8-case gap is suggestive, not established.
+
+### Experiment A: prompt `p2` vs `p1` (133 of 140 cases measured)
+
+Run `expA_p2-20261017T200247Z`, pre-registered 2026-10-18. Only the prompt changed. 7 cases returned empty replies on every attempt and are voided (excluded from the headline, scored as failures in the sensitivity analysis). Full report: [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md).
+
+| Metric | `p1` | `p2` |
+|---|---|---|
+| Wasted first lookup `lookup_policy("POL-001")` | 145 of 145 traces | **0 of 133** |
+| Status accuracy (114 strict cases, voids excluded) | **95/114** | 74/114 |
+| Unparseable answers (`NO_ANSWER`) | 0 | 34 |
+| S3 invented offsets | 38 cases | 19 cases (20 of 83 vs 10 of 83 where `p2` answered) |
+| Contradictory docs correct | 0/19 | 2/19 |
+| False positives | 0 | 0 |
+| Tokens | 2.19M | 3.08M |
+
+> [!IMPORTANT]
+> **Reading:** the `p2` instructions fix the tool-contract fault and halve invented offsets, but the prompt makes the output format unreliable. All 23 cases that got worse are cases where `p2` gave no parseable answer. Where it answered, its status was right slightly more often than `p1` on the same cases (74 vs 72 of 83). The next experiment should target output reliability.
 
 ---
 
@@ -150,7 +169,7 @@ uv run python -m experiments.run_baseline \
 - [x] **Step 2:** Repeatability trials — 28-case stratified subset, trials 2 & 3: status agreed on 27/28 cases.
 - [x] **Step 3:** Milestone 1 formal one-page report (spec §29): [docs/reports/milestone-1-report.md](docs/reports/milestone-1-report.md).
 - [x] **Step 4:** REF-2 single-shot baseline on the 140-case sample (pre-registered in decisions.md, 2026-10-17): run `ref2_single_shot-20261017T150310Z`.
-- [ ] **Step 5:** Experiment A — Prompt `p2` to eliminate wasted first lookup and resolve offset hallucination (S3). Pre-register in decisions.md first.
+- [x] **Step 5:** Experiment A — Prompt `p2`: run `expA_p2-20261017T200247Z`, 133 of 140 measured. Wasted lookup gone, S3 halved, but 34 unparseable answers and net status accuracy fell (95/114 to 74/114). Report: [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md). A follow-up on output reliability is a separate experiment to pre-register.
 - [ ] **Step 6:** Experiment C — Cross-family comparator (`gemma-4-31b-it`).
 - [ ] **Step 7:** Judge study (LLM judge vs deterministic evaluator vs human audit; spec §18–20), with two human reviewers or the limitation published.
 - [ ] **Step 8:** Automated CI evaluation tiers (spec §22).

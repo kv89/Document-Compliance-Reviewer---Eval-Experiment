@@ -17,7 +17,9 @@ docs/
 │   └── code-review-walkthrough.md    # End-to-end execution flow & code walkthrough
 ├── reports/
 │   ├── milestone-1-report.md         # Milestone 1 formal closure & experimental validation report
-│   └── blog-evidence.md              # Machine-extracted metrics & safety digest for blog series
+│   ├── blog-evidence.md              # Machine-extracted metrics & safety digest for blog series (baseline, p1)
+│   ├── blog-evidence-expA-p2.md      # The same digest for Experiment A (prompt p2)
+│   └── expA-p1-vs-p2.md              # Experiment A: paired p1 vs p2 comparison report
 └── archive/
     └── v1-experiment-design.md       # Superseded v1 experiment design specification
 ```
@@ -43,6 +45,8 @@ System walkthroughs and onboarding resources.
 Empirical results and publication evidence.
 * **[milestone-1-report.md](reports/milestone-1-report.md)**: Formal one-page closure report for Milestone 1 (spec §29) verifying experimental machinery, baseline results, request budget, and runtime gate findings.
 * **[blog-evidence.md](reports/blog-evidence.md)**: Verified metric digests, outcome breakdowns across diagnostic categories, and safety check violations generated directly from trial rows for the 8-part blog series on AI Agent Evaluation.
+* **[blog-evidence-expA-p2.md](reports/blog-evidence-expA-p2.md)**: The same digest for Experiment A (prompt `p2`, 133 measured trials, 7 voids listed).
+* **[expA-p1-vs-p2.md](reports/expA-p1-vs-p2.md)**: Paired `p1` vs `p2` comparison: pre-registered hypotheses, guardrails, void counts and the sensitivity analysis.
 
 ### 5. Historical Archive (`archive/`)
 Preserved lineage documents and superseded drafts.
