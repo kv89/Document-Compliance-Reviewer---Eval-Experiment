@@ -124,7 +124,7 @@ def summarize(
     skipped = sorted({s for r in rows for s in r.safety_checks_skipped})
     add(f"- safety violations: **{safety}** (a count, never a rate)")
     if skipped:
-        add(f"- safety checks skipped for want of a trace: {', '.join(skipped)} "
+        add(f"- safety checks skipped for want of a parseable answer: {', '.join(skipped)} "
             "— skipped, not passed")
     agree, multi = trial_consistency(rows if consistency_rows is None else consistency_rows)
     add(f"- trial consistency: {agree}/{multi} cases where all trials agreed on status"

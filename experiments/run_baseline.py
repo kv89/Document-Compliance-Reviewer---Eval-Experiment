@@ -446,8 +446,8 @@ def main() -> None:
                 # measured, and say so in the report.
                 remaining = planned - len(measured)
                 stopped_early = (
-                    f"the daily free-tier quota was exhausted after {attempted} of "
-                    f"{remaining} planned trials"
+                    f"the daily free-tier quota was exhausted after {attempted} trials this "
+                    f"session, with {remaining} of {planned} planned trials still unmeasured"
                 )
                 print(f"  stopping: {stopped_early}")
                 break
