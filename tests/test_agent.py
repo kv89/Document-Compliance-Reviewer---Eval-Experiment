@@ -15,7 +15,7 @@ import pytest
 
 from agent.agent import Agent, extract_json
 from agent.llm.client import HarnessError, LLMResponse, QuotaPolicy, ScriptedClient
-from agent.prompts import p1, p2, p3
+from agent.prompts import p1, p2, p3, p4
 from agent.prompts.p1 import SYSTEM_PROMPT
 from agent.schemas.models import ComplianceStatus, FindingType, Severity
 from agent.schemas.trace import (
@@ -174,6 +174,36 @@ def test_p3_is_p2_plus_the_output_format_section_only(document, policy):
     )
     assert client.calls[0][0] == p3.SYSTEM_PROMPT
     assert result.trace.config.prompt_version == "p3"
+
+
+def test_p3_text_is_frozen():
+    """p3 is a measured arm. Adding p4 must not change a character of it."""
+    text = p3.SYSTEM_PROMPT + p3.USER_PROMPT + p3.TOOL_RESULT_PROMPT
+    assert hashlib.sha256(text.encode()).hexdigest() == (
+        "a9d06b8fdb97d913a0500d7e639919be9e3fef28ea280af54164b7d408c56ce6"
+    )
+
+
+def test_p4_is_p3_plus_the_tool_argument_example_only(document, policy):
+    assert p4.SYSTEM_PROMPT == p3.SYSTEM_PROMPT + p4.TOOL_ARGUMENTS
+    assert p4.USER_PROMPT == p3.USER_PROMPT
+    assert p4.TOOL_RESULT_PROMPT == p3.TOOL_RESULT_PROMPT
+    assert p4.initial_prompt(policy) == p3.initial_prompt(policy)
+    result, client = _run(
+        ['{"tool": "list_document_sections", "arguments": {}}', _final("COMPLIANT")],
+        document,
+        policy,
+        prompt_version="p4",
+    )
+    assert client.calls[0][0] == p4.SYSTEM_PROMPT
+    assert result.trace.config.prompt_version == "p4"
+
+
+def test_p4_example_puts_rule_id_inside_arguments():
+    """The correct example parses to a call with the parameter in `arguments`."""
+    correct = '{"tool": "lookup_policy", "arguments": {"rule_id": "CLAUSE-PAY-001"}}'
+    assert correct in p4.TOOL_ARGUMENTS
+    assert json.loads(correct)["arguments"] == {"rule_id": "CLAUSE-PAY-001"}
 
 
 def test_unknown_prompt_version_is_refused(document, policy):
@@ -365,7 +395,7 @@ def test_traces_serialise_and_reload(document, policy, tmp_path):
 
 
 # ---------------------------------------------------------------- contract documentation
-@pytest.mark.parametrize("prompt", [p1, p2, p3], ids=["p1", "p2", "p3"])
+@pytest.mark.parametrize("prompt", [p1, p2, p3, p4], ids=["p1", "p2", "p3", "p4"])
 def test_the_prompt_documents_every_enum_value_the_schema_accepts(prompt):
     """A value the schema accepts but the prompt never mentions is unreachable by construction.
 
@@ -377,7 +407,7 @@ def test_the_prompt_documents_every_enum_value_the_schema_accepts(prompt):
             assert member.value in prompt.SYSTEM_PROMPT, f"{enum.__name__}.{member.value} not in prompt"
 
 
-@pytest.mark.parametrize("prompt", [p1, p2, p3], ids=["p1", "p2", "p3"])
+@pytest.mark.parametrize("prompt", [p1, p2, p3, p4], ids=["p1", "p2", "p3", "p4"])
 def test_the_prompt_lists_exactly_the_authorized_tools(prompt, document, policy):
     from agent.tools.toolset import ToolSet
 

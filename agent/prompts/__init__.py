@@ -8,10 +8,10 @@ from __future__ import annotations
 
 from types import ModuleType
 
-from agent.prompts import p1, p2, p3
+from agent.prompts import p1, p2, p3, p4
 from agent.schemas.models import Policy
 
-PROMPTS: dict[str, ModuleType] = {"p1": p1, "p2": p2, "p3": p3}
+PROMPTS: dict[str, ModuleType] = {"p1": p1, "p2": p2, "p3": p3, "p4": p4}
 
 
 def get_prompt(version: str) -> ModuleType:

@@ -1,0 +1,40 @@
+# Experiment A3, arm D: prompt p4 (spec section 16). Pre-registered in docs/decisions/decisions.md,
+# 2026-10-26, before any live call.
+#
+# Identical to expA2_p3.yaml except `experiment_id` and `prompt_version`. The prompt is the only
+# variable. The API key is NOT here and must never be. It is read from GOOGLE_API_KEY at run time.
+
+experiment_id: expA3_p4
+agent_version: v1
+prompt_version: p4
+tool_set_version: t1
+
+model:
+  provider: google-ai-studio
+  name: gemini-3.5-flash-lite
+  tag: gemini-3.5-flash-lite
+  temperature: 0.0
+  top_p: 1.0
+  seed: 7
+  max_output_tokens: 2048
+  thinking_level: MINIMAL
+
+agent:
+  max_steps: 20
+
+dataset:
+  version: v1
+  policy_id: POL-001
+  cases_per_category: 20
+  sample_seed: 7
+  # Pins the sample to the 140 cases p1 was measured on, as in Experiments A and A2.
+  prefer_run: baseline_v1-20261002T092914Z
+
+run:
+  trials_per_case: 1
+
+quota:
+  max_retries: 8
+  initial_backoff_seconds: 5
+  backoff_multiplier: 2
+  max_backoff_seconds: 90
