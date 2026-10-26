@@ -149,11 +149,17 @@ On this synthetic, deliberately balanced set (figures in the [README](../../READ
   114 clear-cut documents. Where `p2` did answer, it was slightly more often right than `p1`.
   Contradictions are still mostly missed. Details in
   [expA-p1-vs-p2.md](../reports/expA-p1-vs-p2.md).
+- **Experiment A2 (prompt `p3`, `p2` plus a format section) fixed the format but brought back a
+  wasted first call.** Answers the program could not read, plus empty replies, fell from 41 to 7
+  of 140, and status accuracy on the clear-cut documents recovered from 74 to 102 of 120 (`p1`:
+  101). Contradictions were right on 7 of 20 (`p1`: 1, `p2`: 2). But every trace now opens with a
+  tool call whose argument sits in the wrong place, and it costs more tokens than `p1`. Details in
+  [expA2-p2-vs-p3.md](../reports/expA2-p2-vs-p3.md).
 
 ## What comes next
 
 The ordered list is the "Project Roadmap & Next Steps" section of the [README](../../README.md). In
-short: a follow-up experiment on making the output format reliable (to be pre-registered), then
+short: a follow-up experiment on the wrong-place tool argument (to be pre-registered), then
 a second model family, then testing whether an AI judge can grade answers reliably against human
 reviewers, then automated test tiers and the final statistics.
 
@@ -167,4 +173,5 @@ reviewers, then automated test tiers and the final statistics.
 | headline results | [README](../../README.md) and [milestone-1-report.md](../reports/milestone-1-report.md) |
 | every number used in the blog | [blog-evidence.md](../reports/blog-evidence.md) and [blog-evidence-expA-p2.md](../reports/blog-evidence-expA-p2.md) |
 | the prompt experiment, `p1` vs `p2` | [expA-p1-vs-p2.md](../reports/expA-p1-vs-p2.md) |
+| the output-format experiment, `p3` | [expA2-p2-vs-p3.md](../reports/expA2-p2-vs-p3.md) and [blog-evidence-expA2-p3.md](../reports/blog-evidence-expA2-p3.md) |
 | raw data | `results/raw/` (one row per answer) and `results/traces/` (step-by-step traces) |

@@ -430,7 +430,8 @@ def main() -> None:
             append_jsonl(rows_path, [row])
             attempted += 1
             print(
-                f"  {case.case_id} trial {trial_id}: {row.actual_status} "
+                f"  {datetime.now(timezone.utc):%H:%M:%SZ} "
+                f"{case.case_id} trial {trial_id}: {row.actual_status} "
                 f"({row.deterministic_result}, {elapsed:.1f}s, {row.total_tokens} tokens, "
                 f"{row.num_llm_calls} llm calls)"
             )

@@ -23,6 +23,8 @@ The project follows a strict **pre-registration and specification-first** method
 | [docs/reports/blog-evidence.md](docs/reports/blog-evidence.md) | **Blog Evidence Digest.** Machine-extracted metrics, safety breakdown, and trace pointers for the blog series. |
 | [docs/reports/blog-evidence-expA-p2.md](docs/reports/blog-evidence-expA-p2.md) | **Experiment A Digest.** The same digest for prompt `p2`. |
 | [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md) | **Experiment A Report.** Paired `p1` vs `p2` comparison with void counts and the sensitivity analysis. |
+| [docs/reports/blog-evidence-expA2-p3.md](docs/reports/blog-evidence-expA2-p3.md) | **Experiment A2 Digest.** The same digest for prompt `p3`. |
+| [docs/reports/expA2-p2-vs-p3.md](docs/reports/expA2-p2-vs-p3.md) | **Experiment A2 Report.** `p1`, `p2` and `p3` on the same sample, with voids scored as failures. |
 | [docs/archive/v1-experiment-design.md](docs/archive/v1-experiment-design.md) | **Historical Archive.** Superseded version 1 experiment design specification. |
 
 ---
@@ -104,6 +106,22 @@ Run `expA_p2-20261017T200247Z`, pre-registered 2026-10-18. Only the prompt chang
 > [!IMPORTANT]
 > **Reading:** the `p2` instructions fix the tool-contract fault and halve invented offsets, but the prompt makes the output format unreliable. All 23 cases that got worse are cases where `p2` gave no parseable answer. Where it answered, its status was right slightly more often than `p1` on the same cases (74 vs 72 of 83). The next experiment should target output reliability.
 
+### Experiment A2: prompt `p3` (`p2` plus an output-format section), 136 of 140 cases measured
+
+Run `expA2_p3-20261025T120453Z`, pre-registered 2026-10-25, closed 2026-10-26. Only the prompt changed. 4 cases returned empty replies on every attempt. Voids are scored as `NO_ANSWER` failures in the headline. Full report: [docs/reports/expA2-p2-vs-p3.md](docs/reports/expA2-p2-vs-p3.md).
+
+| Metric (140 cases, voids as failures) | `p1` | `p2` | `p3` |
+|---|---|---|---|
+| `NO_ANSWER` plus voids | 0 | 41 | **7** |
+| Strict status correct (of 120) | 101 | 74 | **102** |
+| Contradictory docs correct (of 20) | 1 | 2 | **7** |
+| False-positive cases | 0 | 0 | 0 |
+| First tool call failed | 140 traces | 0 | **136 traces** |
+| Tokens per measured trial | 16,626 | 23,162 | 27,206 |
+
+> [!IMPORTANT]
+> **Reading:** the format section held its hypothesis (7 of 140, threshold 10) and brought accuracy back to `p1`'s level while keeping the contradiction gains. It also brought back a wasted first call, now the model putting `rule_id` outside `arguments` (S6 flags 133 cases). The next experiment should target that fault.
+
 ---
 
 ## ⚡ Guiding Rules & Principles
@@ -170,6 +188,7 @@ uv run python -m experiments.run_baseline \
 - [x] **Step 3:** Milestone 1 formal one-page report (spec §29): [docs/reports/milestone-1-report.md](docs/reports/milestone-1-report.md).
 - [x] **Step 4:** REF-2 single-shot baseline on the 140-case sample (pre-registered in decisions.md, 2026-10-17): run `ref2_single_shot-20261017T150310Z`.
 - [x] **Step 5:** Experiment A — Prompt `p2`: run `expA_p2-20261017T200247Z`, 133 of 140 measured. Wasted lookup gone, S3 halved, but 34 unparseable answers and net status accuracy fell (95/114 to 74/114). Report: [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md). A follow-up on output reliability is a separate experiment to pre-register.
+- [x] **Step 5b:** Experiment A2 — Prompt `p3` (output-format section): run `expA2_p3-20261025T120453Z`, 136 of 140 measured. `NO_ANSWER` plus voids 41 to 7, strict status 74 to 102 of 120, contradictions 7 of 20; but every trace opens with an invalid `lookup_policy` call. Report: [docs/reports/expA2-p2-vs-p3.md](docs/reports/expA2-p2-vs-p3.md). A follow-up on the tool-argument fault is a separate experiment to pre-register.
 - [ ] **Step 6:** Experiment C — Cross-family comparator (`gemma-4-31b-it`).
 - [ ] **Step 7:** Judge study (LLM judge vs deterministic evaluator vs human audit; spec §18–20), with two human reviewers or the limitation published.
 - [ ] **Step 8:** Automated CI evaluation tiers (spec §22).

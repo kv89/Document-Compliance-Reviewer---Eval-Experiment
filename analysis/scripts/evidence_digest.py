@@ -154,9 +154,9 @@ def main() -> None:
         ),
         "",
         (
-            "Reading: every trace makes the same wasted first policy lookup, passing the policy "
-            f"id as a rule id. It is a systematic prompt/tool-contract issue, not noise (prompt "
-            f"{rows[0]['prompt_version']} unchanged)."
+            "Reading: every trace contains a failed tool call of the shape listed above. It is "
+            "systematic, a prompt/tool-contract issue, not noise (prompt "
+            f"{rows[0]['prompt_version']})."
             if hits == total
             else f"Reading: {hits} of {total} traces contain a failed tool call."
         ),

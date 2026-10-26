@@ -19,7 +19,9 @@ docs/
 │   ├── milestone-1-report.md         # Milestone 1 formal closure & experimental validation report
 │   ├── blog-evidence.md              # Machine-extracted metrics & safety digest for blog series (baseline, p1)
 │   ├── blog-evidence-expA-p2.md      # The same digest for Experiment A (prompt p2)
-│   └── expA-p1-vs-p2.md              # Experiment A: paired p1 vs p2 comparison report
+│   ├── expA-p1-vs-p2.md              # Experiment A: paired p1 vs p2 comparison report
+│   ├── blog-evidence-expA2-p3.md     # The same digest for Experiment A2 (prompt p3)
+│   └── expA2-p2-vs-p3.md             # Experiment A2: p1, p2 and p3 compared on the same sample
 └── archive/
     └── v1-experiment-design.md       # Superseded v1 experiment design specification
 ```
@@ -47,6 +49,8 @@ Empirical results and publication evidence.
 * **[blog-evidence.md](reports/blog-evidence.md)**: Verified metric digests, outcome breakdowns across diagnostic categories, and safety check violations generated directly from trial rows for the 8-part blog series on AI Agent Evaluation.
 * **[blog-evidence-expA-p2.md](reports/blog-evidence-expA-p2.md)**: The same digest for Experiment A (prompt `p2`, 133 measured trials, 7 voids listed).
 * **[expA-p1-vs-p2.md](reports/expA-p1-vs-p2.md)**: Paired `p1` vs `p2` comparison: pre-registered hypotheses, guardrails, void counts and the sensitivity analysis.
+* **[blog-evidence-expA2-p3.md](reports/blog-evidence-expA2-p3.md)**: The same digest for Experiment A2 (prompt `p3`, 136 measured trials, 4 voids listed).
+* **[expA2-p2-vs-p3.md](reports/expA2-p2-vs-p3.md)**: Experiment A2 report: `p1`, `p2` and `p3` on the same 140 cases, with voids scored as failures, paired counts and the new tool-argument fault.
 
 ### 5. Historical Archive (`archive/`)
 Preserved lineage documents and superseded drafts.
