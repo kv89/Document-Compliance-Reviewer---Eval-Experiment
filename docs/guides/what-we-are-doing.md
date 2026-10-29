@@ -155,11 +155,17 @@ On this synthetic, deliberately balanced set (figures in the [README](../../READ
   101). Contradictions were right on 7 of 20 (`p1`: 1, `p2`: 2). But every trace now opens with a
   tool call whose argument sits in the wrong place, and it costs more tokens than `p1`. Details in
   [expA2-p2-vs-p3.md](../reports/expA2-p2-vs-p3.md).
+- **Experiment A3 (prompt `p4`, `p3` plus one worked tool-call example) removed that wasted call.**
+  No trace now opens with a failed call (136 of 136 before), every document gets an answer, and
+  status accuracy on the clear-cut documents rose to 108 of 120 (`p1`: 101). Contradictions were
+  right on 8 of 20. The cost: invented text positions (S3) went up, to 39 documents from 24, and
+  tokens per document are 73% above `p1`. Details in
+  [expA3-p3-vs-p4.md](../reports/expA3-p3-vs-p4.md).
 
 ## What comes next
 
 The ordered list is the "Project Roadmap & Next Steps" section of the [README](../../README.md). In
-short: a follow-up experiment on the wrong-place tool argument (to be pre-registered), then
+short: a decision between a follow-up on the invented text positions and going straight to
 a second model family, then testing whether an AI judge can grade answers reliably against human
 reviewers, then automated test tiers and the final statistics.
 
@@ -174,4 +180,5 @@ reviewers, then automated test tiers and the final statistics.
 | every number used in the blog | [blog-evidence.md](../reports/blog-evidence.md) and [blog-evidence-expA-p2.md](../reports/blog-evidence-expA-p2.md) |
 | the prompt experiment, `p1` vs `p2` | [expA-p1-vs-p2.md](../reports/expA-p1-vs-p2.md) |
 | the output-format experiment, `p3` | [expA2-p2-vs-p3.md](../reports/expA2-p2-vs-p3.md) and [blog-evidence-expA2-p3.md](../reports/blog-evidence-expA2-p3.md) |
+| the tool-argument experiment, `p4` | [expA3-p3-vs-p4.md](../reports/expA3-p3-vs-p4.md) and [blog-evidence-expA3-p4.md](../reports/blog-evidence-expA3-p4.md) |
 | raw data | `results/raw/` (one row per answer) and `results/traces/` (step-by-step traces) |

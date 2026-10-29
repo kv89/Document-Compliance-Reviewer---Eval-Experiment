@@ -25,6 +25,8 @@ The project follows a strict **pre-registration and specification-first** method
 | [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md) | **Experiment A Report.** Paired `p1` vs `p2` comparison with void counts and the sensitivity analysis. |
 | [docs/reports/blog-evidence-expA2-p3.md](docs/reports/blog-evidence-expA2-p3.md) | **Experiment A2 Digest.** The same digest for prompt `p3`. |
 | [docs/reports/expA2-p2-vs-p3.md](docs/reports/expA2-p2-vs-p3.md) | **Experiment A2 Report.** `p1`, `p2` and `p3` on the same sample, with voids scored as failures. |
+| [docs/reports/blog-evidence-expA3-p4.md](docs/reports/blog-evidence-expA3-p4.md) | **Experiment A3 Digest.** The same digest for prompt `p4`. |
+| [docs/reports/expA3-p3-vs-p4.md](docs/reports/expA3-p3-vs-p4.md) | **Experiment A3 Report.** `p1` to `p4` on the same sample, with voids scored as failures. |
 | [docs/archive/v1-experiment-design.md](docs/archive/v1-experiment-design.md) | **Historical Archive.** Superseded version 1 experiment design specification. |
 
 ---
@@ -122,6 +124,23 @@ Run `expA2_p3-20261025T120453Z`, pre-registered 2026-10-25, closed 2026-10-26. O
 > [!IMPORTANT]
 > **Reading:** the format section held its hypothesis (7 of 140, threshold 10) and brought accuracy back to `p1`'s level while keeping the contradiction gains. It also brought back a wasted first call, now the model putting `rule_id` outside `arguments` (S6 flags 133 cases). The next experiment should target that fault.
 
+### Experiment A3: prompt `p4` (`p3` plus a tool-argument example), 140 of 140 cases measured
+
+Run `expA3_p4-20261026T155432Z`, pre-registered 2026-10-26. Only the prompt changed. No voids. Full report: [docs/reports/expA3-p3-vs-p4.md](docs/reports/expA3-p3-vs-p4.md).
+
+| Metric (140 cases, voids as failures) | `p1` | `p2` | `p3` | `p4` |
+|---|---|---|---|---|
+| First tool call failed | 140 traces | 0 | 136 | **0** |
+| `NO_ANSWER` plus voids | 0 | 41 | 7 | **0** |
+| Strict status correct (of 120) | 101 | 74 | 102 | **108** |
+| Contradictory docs correct (of 20) | 1 | 2 | 7 | **8** |
+| S3 invented-offset cases | 38 | 19 | 24 | 39 |
+| S6 malformed-argument cases | 0 | 0 | 133 | **0** |
+| Tokens per measured trial | 16,626 | 23,162 | 27,206 | 28,792 |
+
+> [!IMPORTANT]
+> **Reading:** the example removed the invalid first call (hypothesis held: 0 of 140, threshold 10%) and every case now has an answer. Strict status is the best of the four arms. S3 got worse (35 against 24 on the cases both `p3` and `p4` answered), and offsets are consistent for 35 of 78 quotes. Contradictions are still 12 of 20 not correct.
+
 ---
 
 ## ⚡ Guiding Rules & Principles
@@ -189,6 +208,7 @@ uv run python -m experiments.run_baseline \
 - [x] **Step 4:** REF-2 single-shot baseline on the 140-case sample (pre-registered in decisions.md, 2026-10-17): run `ref2_single_shot-20261017T150310Z`.
 - [x] **Step 5:** Experiment A — Prompt `p2`: run `expA_p2-20261017T200247Z`, 133 of 140 measured. Wasted lookup gone, S3 halved, but 34 unparseable answers and net status accuracy fell (95/114 to 74/114). Report: [docs/reports/expA-p1-vs-p2.md](docs/reports/expA-p1-vs-p2.md). A follow-up on output reliability is a separate experiment to pre-register.
 - [x] **Step 5b:** Experiment A2 — Prompt `p3` (output-format section): run `expA2_p3-20261025T120453Z`, 136 of 140 measured. `NO_ANSWER` plus voids 41 to 7, strict status 74 to 102 of 120, contradictions 7 of 20; but every trace opens with an invalid `lookup_policy` call. Report: [docs/reports/expA2-p2-vs-p3.md](docs/reports/expA2-p2-vs-p3.md). A follow-up on the tool-argument fault is a separate experiment to pre-register.
+- [x] **Step 5c:** Experiment A3 — Prompt `p4` (tool-argument example): run `expA3_p4-20261026T155432Z`, 140 of 140 measured. First-call failures 136 to 0, strict status 108 of 120, contradictions 8 of 20; S3 rose to 39 cases. Report: [docs/reports/expA3-p3-vs-p4.md](docs/reports/expA3-p3-vs-p4.md).
 - [ ] **Step 6:** Experiment C — Cross-family comparator (`gemma-4-31b-it`).
 - [ ] **Step 7:** Judge study (LLM judge vs deterministic evaluator vs human audit; spec §18–20), with two human reviewers or the limitation published.
 - [ ] **Step 8:** Automated CI evaluation tiers (spec §22).
